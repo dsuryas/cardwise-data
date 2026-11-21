@@ -1,6 +1,6 @@
 # cardwise-data
 
-Keeps CardWise's card rules and bank offers fresh. Every morning at 06:00 IST a GitHub Action reads the banks' pages, checks and extracts with Claude under strict guardrails, and publishes a **signed** catalog the app downloads anonymously.
+Keeps CardWise's card rules and bank offers fresh. Every morning at 06:00 IST a GitHub Action reads the banks' pages, checks and extracts with Grok (xAI) under strict guardrails, and publishes a **signed** catalog the app downloads anonymously.
 
 ```
 sources/sources.json ──fetch (robots.txt respected)──▶ page text
@@ -27,7 +27,7 @@ catalog/catalog.json ◀── apply ◀── guardrails ◀── Claude: chec
 2. **Make a signing key.** `npm ci && npm run keygen`. It prints two lines:
    - the private key → GitHub repo **Settings → Secrets and variables → Actions → New secret** named `CATALOG_SIGNING_KEY`
    - the public key → keep it for step 6
-3. **Add your Claude API key** as another secret, `ANTHROPIC_API_KEY` (from console.anthropic.com). Optional: a repository variable `CLAUDE_MODEL` to change the model.
+3. **Add your xAI API key** as another secret, `XAI_API_KEY` (from console.x.ai). Default model `grok-4-1-fast-reasoning`; set a repository variable `GROK_MODEL` to change it. (Claude still works: add `ANTHROPIC_API_KEY` instead and leave `XAI_API_KEY` unset.)
 4. **Turn on Pages.** Settings → Pages → Source: **GitHub Actions**.
 5. **Let the bot open PRs.** Settings → Actions → General → Workflow permissions: **Read and write**, and tick **Allow GitHub Actions to create and approve pull requests**.
 6. **Connect the app.** Actions → **Publish catalog** → Run workflow. When it's done, `https://<you>.github.io/cardwise-data/catalog.json` exists. In the CardWise project's `gradle.properties` add:
@@ -60,7 +60,7 @@ GitHub Actions and Pages are free for public repos. Claude API usage is the only
 npm test             # 14 tests: schema, guardrails, robots.txt, end-to-end run, signing
 npm run typecheck
 npm run validate     # check catalog/catalog.json
-npm run pipeline     # needs ANTHROPIC_API_KEY; USE_BROWSER=1 for JS pages
+npm run pipeline     # needs XAI_API_KEY (or ANTHROPIC_API_KEY); USE_BROWSER=1 for JS pages
 npm run keygen
 CATALOG_SIGNING_KEY=... npm run sign   # writes public/catalog.json + .sig
 ```

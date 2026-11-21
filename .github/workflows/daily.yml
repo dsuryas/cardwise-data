@@ -30,6 +30,8 @@ jobs:
           restore-keys: pages-
       - run: npm run pipeline
         env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          GROK_MODEL: ${{ vars.GROK_MODEL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           USE_BROWSER: "1"
       - id: s

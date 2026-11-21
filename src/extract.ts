@@ -1,4 +1,4 @@
-// LLM extraction with guardrails. The model never edits the catalog freely:
+// LLM extraction with guardrails (Grok by default, Claude optional). The model never edits the catalog freely:
 //  - card pages: it CHECKS each existing rule (same / changed / not found) and must quote the page
 //  - offer pages: it lists offers using only ids we give it, each with a verbatim quote
 // Every quote is then checked against the page text, and every number against its quote.
@@ -54,25 +54,9 @@ function describeRule(card: Card, r: Rule): string {
   return `- ${r.id}: "${r.label}" ${rate} ${scope}${cap ? ` cap=${cap.limit}/${cap.period}` : ""}${r.minTxn ? ` minTxn=${r.minTxn}` : ""}`;
 }
 
-export class ClaudeExtractor implements Extractor {
-  private client: Anthropic;
-  constructor(private model = process.env.CLAUDE_MODEL ?? "claude-sonnet-5-5", apiKey = process.env.ANTHROPIC_API_KEY) {
-    if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
-    this.client = new Anthropic({ apiKey });
-  }
-
-  private async tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
-    const res = await this.client.messages.create({
-      model: this.model,
-      max_tokens: 4096,
-      tools: [{ name, description, input_schema: schema as never }],
-      tool_choice: { type: "tool", name },
-      messages: [{ role: "user", content: prompt }],
-    });
-    const block = res.content.find((b) => b.type === "tool_use");
-    if (!block || block.type !== "tool_use") throw new Error("model returned no structured answer");
-    return block.input as T;
-  }
+/** Shared prompts and schemas; each provider only implements one forced tool call. */
+abstract class LlmExtractor implements Extractor {
+  protected abstract tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T>;
 
   async checkCard(card: Card, _catalog: Catalog, pageText: string): Promise<CardCheck> {
     const prompt = [
@@ -149,6 +133,81 @@ export class ClaudeExtractor implements Extractor {
     }, prompt);
     return out.offers ?? [];
   }
+}
+
+/** xAI Grok via its OpenAI-compatible Chat Completions API. Default for the daily run. */
+export class GrokExtractor extends LlmExtractor {
+  constructor(
+    private model = process.env.GROK_MODEL || "grok-4-1-fast-reasoning",
+    private apiKey = process.env.XAI_API_KEY,
+    private baseUrl = process.env.XAI_BASE_URL || "https://api.x.ai/v1",
+  ) {
+    super();
+    if (!apiKey) throw new Error("XAI_API_KEY is not set");
+  }
+
+  protected async tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch(`${this.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` },
+          body: JSON.stringify({
+            model: this.model,
+            max_tokens: 8192,
+            messages: [{ role: "user", content: prompt }],
+            tools: [{ type: "function", function: { name, description, parameters: schema } }],
+            tool_choice: { type: "function", function: { name } },
+          }),
+          signal: AbortSignal.timeout(180_000),
+        });
+        if (res.status === 429 || res.status >= 500) throw new Error(`xAI API ${res.status}`);
+        if (!res.ok) throw new FatalApiError(`xAI API ${res.status}: ${(await res.text()).slice(0, 300)}`);
+        const body = (await res.json()) as { choices?: { message?: { tool_calls?: { function?: { name?: string; arguments?: string } }[] } }[] };
+        const call = body.choices?.[0]?.message?.tool_calls?.find((c) => c.function?.name === name);
+        if (!call?.function?.arguments) throw new Error("model returned no structured answer");
+        return JSON.parse(call.function.arguments) as T;
+      } catch (e) {
+        if (e instanceof FatalApiError) throw e;
+        lastError = e;
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+      }
+    }
+    throw lastError;
+  }
+}
+
+class FatalApiError extends Error {}
+
+/** Anthropic Claude. Used only if XAI_API_KEY is absent and ANTHROPIC_API_KEY is set. */
+export class ClaudeExtractor extends LlmExtractor {
+  private client: Anthropic;
+  constructor(private model = process.env.CLAUDE_MODEL ?? "claude-sonnet-5-5", apiKey = process.env.ANTHROPIC_API_KEY) {
+    super();
+    if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+    this.client = new Anthropic({ apiKey });
+  }
+
+  protected async tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
+    const res = await this.client.messages.create({
+      model: this.model,
+      max_tokens: 4096,
+      tools: [{ name, description, input_schema: schema as never }],
+      tool_choice: { type: "tool", name },
+      messages: [{ role: "user", content: prompt }],
+    });
+    const block = res.content.find((b) => b.type === "tool_use");
+    if (!block || block.type !== "tool_use") throw new Error("model returned no structured answer");
+    return block.input as T;
+  }
+}
+
+/** Grok when XAI_API_KEY is set, else Claude when ANTHROPIC_API_KEY is set. */
+export function extractorFromEnv(): Extractor {
+  if (process.env.XAI_API_KEY) return new GrokExtractor();
+  if (process.env.ANTHROPIC_API_KEY) return new ClaudeExtractor();
+  throw new Error("Set XAI_API_KEY (Grok) or ANTHROPIC_API_KEY (Claude)");
 }
 
 // ---------- Hallucination guards ----------

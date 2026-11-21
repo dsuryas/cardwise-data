@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { applyCardCheck, cleanOffers, mergeOffers, report, type Change } from "./apply.ts";
-import { ClaudeExtractor, type Extractor } from "./extract.ts";
+import { extractorFromEnv, type Extractor } from "./extract.ts";
 import { fetchPage, httpFetcher, type Fetcher } from "./fetch.ts";
 import { nextVersion, validateCatalog, type Catalog } from "./schema.ts";
 
@@ -89,7 +89,7 @@ async function main() {
   const sources = JSON.parse(readFileSync("sources/sources.json", "utf8")).sources as Source[];
   const cachePath = process.env.PAGE_CACHE ?? ".cache/pages.json";
   const hashes = new Map<string, string>(existsSync(cachePath) ? Object.entries(JSON.parse(readFileSync(cachePath, "utf8"))) : []);
-  const result = await runPipeline(catalog, sources, new ClaudeExtractor(), today, httpFetcher, hashes);
+  const result = await runPipeline(catalog, sources, extractorFromEnv(), today, httpFetcher, hashes);
   mkdirSync(dirname(cachePath), { recursive: true });
   writeFileSync(cachePath, JSON.stringify(Object.fromEntries(hashes), null, 2));
   mkdirSync("out", { recursive: true });
