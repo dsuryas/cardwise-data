@@ -1,0 +1,1912 @@
+{
+  "version": "2026.11.18-1",
+  "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
+  "currencies": [
+    {
+      "id": "cashback",
+      "name": "Cashback",
+      "kind": "CASHBACK",
+      "rupeesPerUnit": 1.0
+    },
+    {
+      "id": "amazon_pay_balance",
+      "name": "Amazon Pay balance",
+      "kind": "CASHBACK",
+      "rupeesPerUnit": 1.0
+    },
+    {
+      "id": "neucoins",
+      "name": "NeuCoins",
+      "kind": "POINTS",
+      "rupeesPerUnit": 1.0
+    },
+    {
+      "id": "hdfc_rp",
+      "name": "HDFC Reward Points",
+      "kind": "POINTS",
+      "rupeesPerUnit": 0.5
+    },
+    {
+      "id": "hdfc_rp_premium",
+      "name": "HDFC Infinia Points",
+      "kind": "POINTS",
+      "rupeesPerUnit": 1.0
+    },
+    {
+      "id": "sbi_rp",
+      "name": "SBI Card Reward Points",
+      "kind": "POINTS",
+      "rupeesPerUnit": 0.25
+    },
+    {
+      "id": "amex_mr",
+      "name": "Amex Membership Rewards",
+      "kind": "POINTS",
+      "rupeesPerUnit": 0.5
+    },
+    {
+      "id": "icici_rp",
+      "name": "ICICI Reward Points",
+      "kind": "POINTS",
+      "rupeesPerUnit": 0.25
+    },
+    {
+      "id": "hdfc_cashpoints_upi",
+      "name": "HDFC CashPoints (UPI RuPay)",
+      "kind": "POINTS",
+      "rupeesPerUnit": 0.25
+    }
+  ],
+  "categories": [
+    {
+      "id": "shopping",
+      "name": "Shopping",
+      "keywords": [
+        "shopping",
+        "order",
+        "buy",
+        "purchase"
+      ]
+    },
+    {
+      "id": "fashion",
+      "name": "Fashion",
+      "parent": "shopping",
+      "keywords": [
+        "clothes",
+        "shirt",
+        "dress",
+        "shoes",
+        "saree",
+        "kurta",
+        "jeans",
+        "sneakers"
+      ]
+    },
+    {
+      "id": "electronics",
+      "name": "Electronics",
+      "parent": "shopping",
+      "keywords": [
+        "phone",
+        "mobile",
+        "laptop",
+        "tv",
+        "television",
+        "iphone",
+        "headphones",
+        "earbuds",
+        "fridge",
+        "washing machine",
+        "ac",
+        "tablet",
+        "ipad",
+        "camera",
+        "electronics"
+      ]
+    },
+    {
+      "id": "beauty",
+      "name": "Beauty",
+      "parent": "shopping",
+      "keywords": [
+        "makeup",
+        "skincare",
+        "cosmetics",
+        "perfume"
+      ]
+    },
+    {
+      "id": "groceries",
+      "name": "Groceries",
+      "keywords": [
+        "grocery",
+        "groceries",
+        "vegetables",
+        "veggies",
+        "milk",
+        "fruits",
+        "provisions",
+        "kirana"
+      ]
+    },
+    {
+      "id": "food_delivery",
+      "name": "Food delivery",
+      "keywords": [
+        "food delivery",
+        "order food",
+        "biryani",
+        "pizza",
+        "dinner order",
+        "lunch order"
+      ]
+    },
+    {
+      "id": "dining",
+      "name": "Dining out",
+      "keywords": [
+        "restaurant",
+        "dine",
+        "dining",
+        "cafe",
+        "dinner",
+        "lunch",
+        "breakfast",
+        "buffet",
+        "bar"
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Travel",
+      "keywords": [
+        "trip",
+        "travel",
+        "holiday",
+        "vacation",
+        "tour"
+      ]
+    },
+    {
+      "id": "flights",
+      "name": "Flights",
+      "parent": "travel",
+      "keywords": [
+        "flight",
+        "flights",
+        "air ticket",
+        "airline",
+        "plane"
+      ]
+    },
+    {
+      "id": "hotels",
+      "name": "Hotels",
+      "parent": "travel",
+      "keywords": [
+        "hotel",
+        "stay",
+        "resort",
+        "room booking"
+      ]
+    },
+    {
+      "id": "rail",
+      "name": "Train tickets",
+      "parent": "travel",
+      "keywords": [
+        "train",
+        "rail",
+        "railway",
+        "tatkal"
+      ]
+    },
+    {
+      "id": "cabs",
+      "name": "Cabs",
+      "parent": "travel",
+      "keywords": [
+        "cab",
+        "taxi",
+        "ride",
+        "auto"
+      ]
+    },
+    {
+      "id": "movies",
+      "name": "Movies and events",
+      "keywords": [
+        "movie",
+        "movies",
+        "film",
+        "cinema",
+        "concert",
+        "show",
+        "event tickets"
+      ]
+    },
+    {
+      "id": "fuel",
+      "name": "Fuel",
+      "keywords": [
+        "petrol",
+        "diesel",
+        "fuel",
+        "cng",
+        "petrol pump"
+      ]
+    },
+    {
+      "id": "utilities",
+      "name": "Bills and recharges",
+      "keywords": [
+        "electricity",
+        "eb bill",
+        "current bill",
+        "water bill",
+        "gas bill",
+        "broadband",
+        "wifi bill",
+        "recharge",
+        "dth",
+        "postpaid",
+        "bill"
+      ]
+    },
+    {
+      "id": "rent",
+      "name": "Rent",
+      "keywords": [
+        "rent",
+        "house rent",
+        "maintenance"
+      ]
+    },
+    {
+      "id": "wallet_load",
+      "name": "Wallet top-up",
+      "keywords": [
+        "wallet load",
+        "wallet top up",
+        "add money",
+        "paytm wallet"
+      ]
+    },
+    {
+      "id": "insurance",
+      "name": "Insurance",
+      "keywords": [
+        "insurance",
+        "premium",
+        "policy"
+      ]
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "keywords": [
+        "school fees",
+        "college fees",
+        "tuition",
+        "course fees"
+      ]
+    },
+    {
+      "id": "pharmacy",
+      "name": "Pharmacy",
+      "keywords": [
+        "medicine",
+        "medicines",
+        "pharmacy",
+        "tablets"
+      ]
+    },
+    {
+      "id": "jewellery",
+      "name": "Jewellery",
+      "keywords": [
+        "jewellery",
+        "jewelry",
+        "necklace",
+        "ring",
+        "earrings",
+        "bangle"
+      ]
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "parent": "jewellery",
+      "keywords": [
+        "gold",
+        "gold coin",
+        "sovereign"
+      ]
+    },
+    {
+      "id": "silver",
+      "name": "Silver",
+      "parent": "jewellery",
+      "keywords": [
+        "silver",
+        "silver coin"
+      ]
+    },
+    {
+      "id": "sports",
+      "name": "Sports",
+      "keywords": [
+        "sports",
+        "sports shoes",
+        "cricket",
+        "badminton",
+        "decathlon",
+        "cycle"
+      ]
+    },
+    {
+      "id": "fitness",
+      "name": "Fitness",
+      "keywords": [
+        "gym",
+        "fitness",
+        "yoga class"
+      ]
+    },
+    {
+      "id": "subscriptions",
+      "name": "Subscriptions",
+      "keywords": [
+        "subscription",
+        "ott",
+        "streaming"
+      ]
+    },
+    {
+      "id": "government",
+      "name": "Government and taxes",
+      "keywords": [
+        "income tax",
+        "property tax",
+        "passport",
+        "government fee",
+        "challan"
+      ]
+    }
+  ],
+  "merchants": [
+    {
+      "id": "amazon",
+      "name": "Amazon",
+      "category": "shopping",
+      "aliases": [
+        "amazon",
+        "amzn",
+        "amazon.in",
+        "great indian festival"
+      ]
+    },
+    {
+      "id": "flipkart",
+      "name": "Flipkart",
+      "category": "shopping",
+      "aliases": [
+        "flipkart",
+        "fk",
+        "big billion days",
+        "bbd"
+      ]
+    },
+    {
+      "id": "myntra",
+      "name": "Myntra",
+      "category": "fashion",
+      "aliases": [
+        "myntra"
+      ]
+    },
+    {
+      "id": "ajio",
+      "name": "AJIO",
+      "category": "fashion",
+      "aliases": [
+        "ajio"
+      ]
+    },
+    {
+      "id": "nykaa",
+      "name": "Nykaa",
+      "category": "beauty",
+      "aliases": [
+        "nykaa"
+      ]
+    },
+    {
+      "id": "tata_cliq",
+      "name": "Tata CLiQ",
+      "category": "shopping",
+      "aliases": [
+        "tata cliq",
+        "tatacliq",
+        "cliq"
+      ]
+    },
+    {
+      "id": "westside",
+      "name": "Westside",
+      "category": "fashion",
+      "online": false,
+      "aliases": [
+        "westside"
+      ]
+    },
+    {
+      "id": "croma",
+      "name": "Croma",
+      "category": "electronics",
+      "online": false,
+      "aliases": [
+        "croma"
+      ]
+    },
+    {
+      "id": "reliance_digital",
+      "name": "Reliance Digital",
+      "category": "electronics",
+      "online": false,
+      "aliases": [
+        "reliance digital"
+      ]
+    },
+    {
+      "id": "blinkit",
+      "name": "Blinkit",
+      "category": "groceries",
+      "aliases": [
+        "blinkit",
+        "grofers"
+      ]
+    },
+    {
+      "id": "zepto",
+      "name": "Zepto",
+      "category": "groceries",
+      "aliases": [
+        "zepto"
+      ]
+    },
+    {
+      "id": "bigbasket",
+      "name": "BigBasket",
+      "category": "groceries",
+      "aliases": [
+        "bigbasket",
+        "big basket",
+        "bb now",
+        "bbnow"
+      ]
+    },
+    {
+      "id": "swiggy_instamart",
+      "name": "Swiggy Instamart",
+      "category": "groceries",
+      "aliases": [
+        "instamart",
+        "swiggy instamart"
+      ]
+    },
+    {
+      "id": "swiggy",
+      "name": "Swiggy",
+      "category": "food_delivery",
+      "aliases": [
+        "swiggy"
+      ]
+    },
+    {
+      "id": "zomato",
+      "name": "Zomato",
+      "category": "food_delivery",
+      "aliases": [
+        "zomato"
+      ]
+    },
+    {
+      "id": "makemytrip",
+      "name": "MakeMyTrip",
+      "category": "travel",
+      "aliases": [
+        "makemytrip",
+        "make my trip",
+        "mmt"
+      ]
+    },
+    {
+      "id": "cleartrip",
+      "name": "Cleartrip",
+      "category": "flights",
+      "aliases": [
+        "cleartrip"
+      ]
+    },
+    {
+      "id": "air_india",
+      "name": "Air India",
+      "category": "flights",
+      "aliases": [
+        "air india"
+      ]
+    },
+    {
+      "id": "irctc",
+      "name": "IRCTC",
+      "category": "rail",
+      "aliases": [
+        "irctc"
+      ]
+    },
+    {
+      "id": "uber",
+      "name": "Uber",
+      "category": "cabs",
+      "aliases": [
+        "uber"
+      ]
+    },
+    {
+      "id": "ola",
+      "name": "Ola",
+      "category": "cabs",
+      "aliases": [
+        "ola"
+      ]
+    },
+    {
+      "id": "bookmyshow",
+      "name": "BookMyShow",
+      "category": "movies",
+      "aliases": [
+        "bookmyshow",
+        "book my show",
+        "bms"
+      ]
+    },
+    {
+      "id": "pvr",
+      "name": "PVR INOX",
+      "category": "movies",
+      "aliases": [
+        "pvr",
+        "inox"
+      ]
+    },
+    {
+      "id": "tanishq",
+      "name": "Tanishq",
+      "category": "jewellery",
+      "online": false,
+      "aliases": [
+        "tanishq"
+      ]
+    },
+    {
+      "id": "caratlane",
+      "name": "CaratLane",
+      "category": "jewellery",
+      "aliases": [
+        "caratlane",
+        "carat lane"
+      ]
+    },
+    {
+      "id": "tata_1mg",
+      "name": "Tata 1mg",
+      "category": "pharmacy",
+      "aliases": [
+        "1mg",
+        "tata 1mg"
+      ]
+    },
+    {
+      "id": "indian_oil",
+      "name": "Indian Oil",
+      "category": "fuel",
+      "online": false,
+      "aliases": [
+        "indian oil",
+        "iocl",
+        "ioc"
+      ]
+    },
+    {
+      "id": "hpcl",
+      "name": "HPCL",
+      "category": "fuel",
+      "online": false,
+      "aliases": [
+        "hpcl",
+        "hp petrol",
+        "hindustan petroleum"
+      ]
+    },
+    {
+      "id": "bpcl",
+      "name": "BPCL",
+      "category": "fuel",
+      "online": false,
+      "aliases": [
+        "bpcl",
+        "bharat petroleum"
+      ]
+    },
+    {
+      "id": "jio",
+      "name": "Jio",
+      "category": "utilities",
+      "aliases": [
+        "jio"
+      ]
+    },
+    {
+      "id": "airtel",
+      "name": "Airtel",
+      "category": "utilities",
+      "aliases": [
+        "airtel"
+      ]
+    },
+    {
+      "id": "cult_fit",
+      "name": "Cult.fit",
+      "category": "fitness",
+      "aliases": [
+        "cult",
+        "cultfit",
+        "cult.fit",
+        "cult fit"
+      ]
+    },
+    {
+      "id": "sony_liv",
+      "name": "Sony LIV",
+      "category": "subscriptions",
+      "aliases": [
+        "sonyliv",
+        "sony liv"
+      ]
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "category": "subscriptions",
+      "aliases": [
+        "netflix"
+      ]
+    },
+    {
+      "id": "hotstar",
+      "name": "JioHotstar",
+      "category": "subscriptions",
+      "aliases": [
+        "hotstar",
+        "jiohotstar",
+        "jio hotstar"
+      ]
+    },
+    {
+      "id": "meesho",
+      "name": "Meesho",
+      "category": "shopping",
+      "aliases": [
+        "meesho"
+      ]
+    },
+    {
+      "id": "easemytrip",
+      "name": "EaseMyTrip",
+      "category": "travel",
+      "aliases": [
+        "easemytrip",
+        "ease my trip",
+        "emt"
+      ]
+    },
+    {
+      "id": "ixigo",
+      "name": "ixigo",
+      "category": "travel",
+      "aliases": [
+        "ixigo"
+      ]
+    },
+    {
+      "id": "yatra",
+      "name": "Yatra",
+      "category": "travel",
+      "aliases": [
+        "yatra"
+      ]
+    },
+    {
+      "id": "vijay_sales",
+      "name": "Vijay Sales",
+      "category": "electronics",
+      "online": false,
+      "aliases": [
+        "vijay sales"
+      ]
+    },
+    {
+      "id": "decathlon",
+      "name": "Decathlon",
+      "category": "sports",
+      "online": false,
+      "aliases": [
+        "decathlon"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": "amazon_pay_icici",
+      "issuer": "ICICI",
+      "name": "Amazon Pay ICICI",
+      "network": "VISA",
+      "currency": "amazon_pay_balance",
+      "annualFee": 0,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "amazon icici",
+        "amazon pay card",
+        "apay icici"
+      ],
+      "rules": [
+        {
+          "id": "apicici_amazon",
+          "label": "on Amazon (Prime; 3% without Prime)",
+          "merchants": [
+            "amazon"
+          ],
+          "percent": 5,
+          "source": "https://www.icicibank.com/revamp/personal-banking/cards/credit-card/amazon-pay-credit-card/faqs"
+        },
+        {
+          "id": "apicici_partners",
+          "label": "at Amazon Pay partners, paying via Amazon Pay",
+          "merchants": [
+            "swiggy",
+            "bookmyshow",
+            "bigbasket"
+          ],
+          "percent": 2,
+          "source": "https://help.icicibank.com/amazon-pay/"
+        },
+        {
+          "id": "apicici_base",
+          "label": "everywhere else",
+          "percent": 1,
+          "source": "https://help.icicibank.com/amazon-pay/"
+        }
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18"
+    },
+    {
+      "id": "sbi_cashback",
+      "issuer": "SBI Card",
+      "name": "SBI Cashback",
+      "network": "VISA",
+      "currency": "cashback",
+      "annualFee": 999,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load",
+        "utilities",
+        "insurance",
+        "education",
+        "jewellery",
+        "rail"
+      ],
+      "aliases": [
+        "sbi cashback card"
+      ],
+      "caps": [
+        {
+          "id": "sbicb_cycle",
+          "period": "STATEMENT_CYCLE",
+          "limit": 5000
+        }
+      ],
+      "rules": [
+        {
+          "id": "sbicb_online",
+          "label": "on online spends",
+          "channels": [
+            "ONLINE"
+          ],
+          "percent": 5,
+          "cap": "sbicb_cycle"
+        },
+        {
+          "id": "sbicb_base",
+          "label": "offline",
+          "percent": 1,
+          "cap": "sbicb_cycle"
+        }
+      ]
+    },
+    {
+      "id": "hdfc_millennia",
+      "issuer": "HDFC",
+      "name": "HDFC Millennia",
+      "network": "MASTERCARD",
+      "currency": "cashback",
+      "annualFee": 1000,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "millennia"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "caps": [
+        {
+          "id": "mil_partner",
+          "period": "CALENDAR_MONTH",
+          "limit": 1000
+        },
+        {
+          "id": "mil_base",
+          "period": "CALENDAR_MONTH",
+          "limit": 1000
+        }
+      ],
+      "rules": [
+        {
+          "id": "mil_partners",
+          "label": "on 10 partner brands",
+          "merchants": [
+            "amazon",
+            "bookmyshow",
+            "cult_fit",
+            "flipkart",
+            "myntra",
+            "sony_liv",
+            "swiggy",
+            "tata_cliq",
+            "uber",
+            "zomato"
+          ],
+          "percent": 5,
+          "cap": "mil_partner",
+          "source": "https://hdfcbank.com/content/api/contentstream-id/723fb80a-2dde-42a3-9793-7ae1be57c87f/5d94cc09-80b7-4073-8c9f-22fad88054f0"
+        },
+        {
+          "id": "mil_base",
+          "label": "everywhere else",
+          "percent": 1,
+          "cap": "mil_base",
+          "source": "https://hdfcbank.com/content/api/contentstream-id/723fb80a-2dde-42a3-9793-7ae1be57c87f/5d94cc09-80b7-4073-8c9f-22fad88054f0"
+        }
+      ]
+    },
+    {
+      "id": "swiggy_hdfc",
+      "issuer": "HDFC",
+      "name": "Swiggy HDFC",
+      "network": "MASTERCARD",
+      "currency": "cashback",
+      "annualFee": 500,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load",
+        "jewellery"
+      ],
+      "aliases": [
+        "swiggy card"
+      ],
+      "caps": [
+        {
+          "id": "swg_swiggy",
+          "period": "STATEMENT_CYCLE",
+          "limit": 1500
+        },
+        {
+          "id": "swg_online",
+          "period": "STATEMENT_CYCLE",
+          "limit": 1500
+        },
+        {
+          "id": "swg_base",
+          "period": "STATEMENT_CYCLE",
+          "limit": 500
+        }
+      ],
+      "rules": [
+        {
+          "id": "swg_swiggy",
+          "label": "on Swiggy",
+          "merchants": [
+            "swiggy",
+            "swiggy_instamart"
+          ],
+          "percent": 10,
+          "cap": "swg_swiggy"
+        },
+        {
+          "id": "swg_online",
+          "label": "on online fashion, electronics, movies",
+          "categories": [
+            "fashion",
+            "electronics",
+            "beauty",
+            "movies"
+          ],
+          "channels": [
+            "ONLINE"
+          ],
+          "percent": 5,
+          "cap": "swg_online"
+        },
+        {
+          "id": "swg_base",
+          "label": "everywhere else",
+          "percent": 1,
+          "cap": "swg_base"
+        }
+      ]
+    },
+    {
+      "id": "tata_neu_infinity_hdfc",
+      "issuer": "HDFC",
+      "name": "Tata Neu Infinity HDFC",
+      "network": "RUPAY",
+      "currency": "neucoins",
+      "annualFee": 1499,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "tata neu card",
+        "neu card",
+        "tata neu infinity"
+      ],
+      "caps": [
+        {
+          "id": "neu_upi",
+          "period": "CALENDAR_MONTH",
+          "limit": 500
+        }
+      ],
+      "rules": [
+        {
+          "id": "neu_tata",
+          "label": "on Tata Neu and Tata brands (non-EMI)",
+          "merchants": [
+            "bigbasket",
+            "croma",
+            "tata_cliq",
+            "westside",
+            "tanishq",
+            "caratlane",
+            "tata_1mg",
+            "air_india"
+          ],
+          "percent": 5,
+          "source": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card"
+        },
+        {
+          "id": "neu_upi",
+          "label": "on UPI via your Tata Neu UPI ID (0.5% on other UPI apps)",
+          "channels": [
+            "UPI_QR"
+          ],
+          "percent": 1.5,
+          "cap": "neu_upi",
+          "source": "https://hdfcbank.com/personal/pay/cards/credit-cards/tata-neu-infinity-hdfc-bank-credit-card"
+        },
+        {
+          "id": "neu_base",
+          "label": "on non-Tata spends",
+          "percent": 1.5,
+          "source": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card"
+        }
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18"
+    },
+    {
+      "id": "flipkart_axis",
+      "issuer": "Axis",
+      "name": "Flipkart Axis",
+      "network": "VISA",
+      "currency": "cashback",
+      "annualFee": 500,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load",
+        "jewellery",
+        "education",
+        "insurance",
+        "utilities"
+      ],
+      "aliases": [
+        "flipkart card",
+        "flipkart axis bank"
+      ],
+      "rules": [
+        {
+          "id": "fka_flipkart",
+          "label": "on Flipkart and Cleartrip",
+          "merchants": [
+            "flipkart",
+            "cleartrip"
+          ],
+          "percent": 5
+        },
+        {
+          "id": "fka_preferred",
+          "label": "on Swiggy, Uber, PVR",
+          "merchants": [
+            "swiggy",
+            "uber",
+            "pvr"
+          ],
+          "percent": 4
+        },
+        {
+          "id": "fka_base",
+          "label": "everywhere else",
+          "percent": 1
+        }
+      ]
+    },
+    {
+      "id": "axis_ace",
+      "issuer": "Axis",
+      "name": "Axis ACE",
+      "network": "VISA",
+      "currency": "cashback",
+      "annualFee": 499,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load",
+        "jewellery",
+        "education",
+        "insurance"
+      ],
+      "aliases": [
+        "ace card"
+      ],
+      "caps": [
+        {
+          "id": "ace_cycle",
+          "period": "STATEMENT_CYCLE",
+          "limit": 500
+        }
+      ],
+      "rules": [
+        {
+          "id": "ace_food_cabs",
+          "label": "on Swiggy, Zomato, Ola",
+          "merchants": [
+            "swiggy",
+            "zomato",
+            "ola"
+          ],
+          "percent": 4,
+          "cap": "ace_cycle"
+        },
+        {
+          "id": "ace_base",
+          "label": "everywhere else",
+          "percent": 1.5
+        }
+      ]
+    },
+    {
+      "id": "hsbc_live_plus",
+      "issuer": "HSBC",
+      "name": "HSBC Live+",
+      "network": "VISA",
+      "currency": "cashback",
+      "annualFee": 999,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load",
+        "jewellery",
+        "utilities",
+        "education",
+        "insurance"
+      ],
+      "aliases": [
+        "live plus",
+        "hsbc live"
+      ],
+      "caps": [
+        {
+          "id": "live_cycle",
+          "period": "STATEMENT_CYCLE",
+          "limit": 1000
+        }
+      ],
+      "rules": [
+        {
+          "id": "live_10",
+          "label": "on dining, food delivery, groceries",
+          "categories": [
+            "dining",
+            "food_delivery",
+            "groceries"
+          ],
+          "percent": 10,
+          "cap": "live_cycle"
+        },
+        {
+          "id": "live_base",
+          "label": "everywhere else",
+          "percent": 1.5
+        }
+      ]
+    },
+    {
+      "id": "sbi_simplyclick",
+      "issuer": "SBI Card",
+      "name": "SBI SimplyCLICK",
+      "network": "VISA",
+      "currency": "sbi_rp",
+      "annualFee": 499,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "simplyclick",
+        "simply click"
+      ],
+      "caps": [
+        {
+          "id": "sc_10x",
+          "period": "CALENDAR_MONTH",
+          "limit": 10000
+        },
+        {
+          "id": "sc_5x",
+          "period": "CALENDAR_MONTH",
+          "limit": 10000
+        }
+      ],
+      "rules": [
+        {
+          "id": "sc_partners",
+          "label": "on partner brands (10X)",
+          "merchants": [
+            "amazon",
+            "bookmyshow",
+            "cleartrip",
+            "myntra",
+            "tata_1mg"
+          ],
+          "units": 10,
+          "perRupees": 100,
+          "cap": "sc_10x"
+        },
+        {
+          "id": "sc_online",
+          "label": "on other online spends (5X)",
+          "channels": [
+            "ONLINE"
+          ],
+          "units": 5,
+          "perRupees": 100,
+          "cap": "sc_5x"
+        },
+        {
+          "id": "sc_base",
+          "label": "offline",
+          "units": 1,
+          "perRupees": 100
+        }
+      ]
+    },
+    {
+      "id": "hdfc_regalia_gold",
+      "issuer": "HDFC",
+      "name": "HDFC Regalia Gold",
+      "network": "VISA",
+      "currency": "hdfc_rp",
+      "annualFee": 2500,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "regalia",
+        "regalia gold"
+      ],
+      "caps": [
+        {
+          "id": "rg_5x",
+          "period": "CALENDAR_MONTH",
+          "limit": 5000
+        }
+      ],
+      "rules": [
+        {
+          "id": "rg_partners",
+          "label": "on Myntra, Nykaa, Reliance Digital (5X)",
+          "merchants": [
+            "myntra",
+            "nykaa",
+            "reliance_digital"
+          ],
+          "units": 20,
+          "perRupees": 150,
+          "cap": "rg_5x"
+        },
+        {
+          "id": "rg_base",
+          "label": "everywhere else",
+          "units": 4,
+          "perRupees": 150
+        }
+      ]
+    },
+    {
+      "id": "hdfc_infinia",
+      "issuer": "HDFC",
+      "name": "HDFC Infinia",
+      "network": "VISA",
+      "currency": "hdfc_rp_premium",
+      "annualFee": 12500,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "infinia"
+      ],
+      "rules": [
+        {
+          "id": "inf_base",
+          "label": "everywhere",
+          "units": 5,
+          "perRupees": 150
+        }
+      ]
+    },
+    {
+      "id": "amex_mrcc",
+      "issuer": "Amex",
+      "name": "Amex Membership Rewards",
+      "network": "AMEX",
+      "currency": "amex_mr",
+      "annualFee": 1500,
+      "excludes": [
+        "fuel",
+        "insurance",
+        "utilities",
+        "wallet_load"
+      ],
+      "aliases": [
+        "amex mrcc",
+        "amex"
+      ],
+      "rules": [
+        {
+          "id": "mrcc_base",
+          "label": "everywhere",
+          "units": 1,
+          "perRupees": 50
+        }
+      ]
+    },
+    {
+      "id": "hdfc_millennia_diners",
+      "issuer": "HDFC",
+      "name": "HDFC Diners Club Millennia",
+      "network": "DINERS",
+      "currency": "cashback",
+      "annualFee": 1000,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "millennia",
+        "diners millennia",
+        "millennia diners"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "caps": [
+        {
+          "id": "mil_partner_d",
+          "period": "CALENDAR_MONTH",
+          "limit": 1000
+        },
+        {
+          "id": "mil_base_d",
+          "period": "CALENDAR_MONTH",
+          "limit": 1000
+        }
+      ],
+      "rules": [
+        {
+          "id": "mil_partners_d",
+          "label": "on 10 partner brands",
+          "merchants": [
+            "amazon",
+            "bookmyshow",
+            "cult_fit",
+            "flipkart",
+            "myntra",
+            "sony_liv",
+            "swiggy",
+            "tata_cliq",
+            "uber",
+            "zomato"
+          ],
+          "percent": 5,
+          "cap": "mil_partner_d",
+          "source": "https://hdfcbank.com/content/api/contentstream-id/723fb80a-2dde-42a3-9793-7ae1be57c87f/5d94cc09-80b7-4073-8c9f-22fad88054f0"
+        },
+        {
+          "id": "mil_base_d",
+          "label": "everywhere else",
+          "percent": 1,
+          "cap": "mil_base_d",
+          "source": "https://hdfcbank.com/content/api/contentstream-id/723fb80a-2dde-42a3-9793-7ae1be57c87f/5d94cc09-80b7-4073-8c9f-22fad88054f0"
+        }
+      ]
+    },
+    {
+      "id": "swiggy_ornge_hdfc",
+      "issuer": "HDFC",
+      "name": "Swiggy Ornge HDFC",
+      "network": "MASTERCARD",
+      "currency": "cashback",
+      "annualFee": 500,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load",
+        "jewellery",
+        "education",
+        "government"
+      ],
+      "aliases": [
+        "swiggy orange",
+        "swiggy ornge",
+        "ornge"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "caps": [
+        {
+          "id": "orn_swiggy",
+          "period": "STATEMENT_CYCLE",
+          "limit": 1500
+        },
+        {
+          "id": "orn_online",
+          "period": "STATEMENT_CYCLE",
+          "limit": 1500
+        },
+        {
+          "id": "orn_base",
+          "period": "STATEMENT_CYCLE",
+          "limit": 1000
+        }
+      ],
+      "rules": [
+        {
+          "id": "orn_swiggy",
+          "label": "on Swiggy food, Instamart, Dineout",
+          "merchants": [
+            "swiggy",
+            "swiggy_instamart"
+          ],
+          "percent": 5,
+          "minTxn": 249,
+          "cap": "orn_swiggy",
+          "source": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdfs/Combined_TnCs_Ornge_and_BLCK.pdf"
+        },
+        {
+          "id": "orn_brands",
+          "label": "on select online brands",
+          "merchants": [
+            "amazon",
+            "flipkart",
+            "nykaa",
+            "cleartrip",
+            "ajio",
+            "netflix",
+            "hotstar",
+            "bookmyshow",
+            "meesho",
+            "uber",
+            "ola",
+            "croma",
+            "reliance_digital",
+            "vijay_sales",
+            "easemytrip",
+            "ixigo",
+            "yatra"
+          ],
+          "channels": [
+            "ONLINE"
+          ],
+          "percent": 5,
+          "minTxn": 249,
+          "cap": "orn_online",
+          "source": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdfs/Combined_TnCs_Ornge_and_BLCK.pdf"
+        },
+        {
+          "id": "orn_categories",
+          "label": "on online fashion and pharmacy",
+          "categories": [
+            "fashion",
+            "pharmacy"
+          ],
+          "channels": [
+            "ONLINE"
+          ],
+          "percent": 5,
+          "minTxn": 249,
+          "cap": "orn_online",
+          "source": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdfs/Combined_TnCs_Ornge_and_BLCK.pdf"
+        },
+        {
+          "id": "orn_base",
+          "label": "everywhere else",
+          "percent": 1,
+          "minTxn": 100,
+          "cap": "orn_base",
+          "source": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdfs/Combined_TnCs_Ornge_and_BLCK.pdf"
+        }
+      ]
+    },
+    {
+      "id": "hdfc_upi_rupay",
+      "issuer": "HDFC",
+      "name": "HDFC UPI RuPay",
+      "network": "RUPAY",
+      "currency": "hdfc_cashpoints_upi",
+      "annualFee": 99,
+      "excludes": [
+        "fuel",
+        "rent",
+        "wallet_load"
+      ],
+      "aliases": [
+        "hdfc rupay",
+        "upi rupay",
+        "hdfc upi card",
+        "mega saver"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "caps": [
+        {
+          "id": "upi_3",
+          "period": "CALENDAR_MONTH",
+          "limit": 500
+        },
+        {
+          "id": "upi_2",
+          "period": "CALENDAR_MONTH",
+          "limit": 500
+        },
+        {
+          "id": "upi_1",
+          "period": "CALENDAR_MONTH",
+          "limit": 500
+        }
+      ],
+      "rules": [
+        {
+          "id": "upi_grocery_dining",
+          "label": "on groceries and dining (3% in CashPoints)",
+          "categories": [
+            "groceries",
+            "dining"
+          ],
+          "units": 3,
+          "perRupees": 100,
+          "cap": "upi_3",
+          "source": "https://v.hdfcbank.com/htdocs/amp/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-credit-card.html"
+        },
+        {
+          "id": "upi_utilities",
+          "label": "on utility bills (2% in CashPoints)",
+          "categories": [
+            "utilities"
+          ],
+          "units": 2,
+          "perRupees": 100,
+          "cap": "upi_2",
+          "source": "https://v.hdfcbank.com/htdocs/amp/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-credit-card.html"
+        },
+        {
+          "id": "upi_base",
+          "label": "everywhere else (1% in CashPoints)",
+          "units": 1,
+          "perRupees": 100,
+          "cap": "upi_1",
+          "source": "https://v.hdfcbank.com/htdocs/amp/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-credit-card.html"
+        }
+      ]
+    },
+    {
+      "id": "sbi_pulse",
+      "issuer": "SBI Card",
+      "name": "SBI Card PULSE",
+      "network": "VISA",
+      "currency": "sbi_rp",
+      "excludes": [
+        "fuel"
+      ],
+      "aliases": [
+        "pulse",
+        "sbi pulse"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "rules": [
+        {
+          "id": "pulse_5x",
+          "label": "on chemist, pharmacy, sports, dining, movies (10 pts/₹100)",
+          "categories": [
+            "pharmacy",
+            "sports",
+            "dining",
+            "movies"
+          ],
+          "units": 10,
+          "perRupees": 100,
+          "source": "https://www.sbicard.com/en/personal/credit-cards/lifestyle/sbi-card-pulse.page"
+        },
+        {
+          "id": "pulse_base",
+          "label": "everywhere else (2 pts/₹100)",
+          "units": 2,
+          "perRupees": 100,
+          "source": "https://www.sbicard.com/en/personal/credit-cards/lifestyle/sbi-card-pulse.page"
+        }
+      ]
+    },
+    {
+      "id": "icici_platinum",
+      "issuer": "ICICI",
+      "name": "ICICI Platinum Chip",
+      "network": "VISA",
+      "currency": "icici_rp",
+      "annualFee": 0,
+      "excludes": [
+        "fuel",
+        "rent",
+        "government"
+      ],
+      "aliases": [
+        "icici platinum",
+        "platinum chip"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "rules": [
+        {
+          "id": "plat_util",
+          "label": "on utilities and insurance (1 pt/₹100)",
+          "categories": [
+            "utilities",
+            "insurance"
+          ],
+          "units": 1,
+          "perRupees": 100,
+          "source": "https://www.icicibank.com/personal-banking/cards/credit-card/platinum-chip"
+        },
+        {
+          "id": "plat_base",
+          "label": "on retail spends (2 pts/₹100)",
+          "units": 2,
+          "perRupees": 100,
+          "source": "https://www.icicibank.com/personal-banking/cards/credit-card/platinum-chip"
+        }
+      ]
+    },
+    {
+      "id": "icici_sapphiro",
+      "issuer": "ICICI",
+      "name": "ICICI Sapphiro",
+      "network": "VISA",
+      "currency": "icici_rp",
+      "annualFee": 3500,
+      "excludes": [
+        "fuel",
+        "rent",
+        "government",
+        "wallet_load"
+      ],
+      "aliases": [
+        "sapphiro"
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-18",
+      "rules": [
+        {
+          "id": "sap_intl",
+          "label": "on international spends (4 pts/₹100)",
+          "channels": [
+            "INTERNATIONAL"
+          ],
+          "units": 4,
+          "perRupees": 100,
+          "source": "https://www.icicibank.com/personal-banking/cards/credit-card/sapphiro-card/key-privileges"
+        },
+        {
+          "id": "sap_util",
+          "label": "on utilities and insurance (1 pt/₹100)",
+          "categories": [
+            "utilities",
+            "insurance"
+          ],
+          "units": 1,
+          "perRupees": 100,
+          "source": "https://www.icicibank.com/personal-banking/cards/credit-card/sapphiro-card/key-privileges"
+        },
+        {
+          "id": "sap_base",
+          "label": "on domestic spends (2 pts/₹100)",
+          "units": 2,
+          "perRupees": 100,
+          "source": "https://www.icicibank.com/personal-banking/cards/credit-card/sapphiro-card/key-privileges"
+        }
+      ]
+    }
+  ],
+  "offers": [
+    {
+      "id": "amz_icici_fest",
+      "title": "Sample: Festival sale: 10% instant off with ICICI",
+      "merchants": [
+        "amazon"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 10,
+      "maxBenefit": 1000,
+      "minTxn": 5000,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31",
+      "event": "sale"
+    },
+    {
+      "id": "fk_axis_sale",
+      "title": "Sample: Sale: 10% instant off with Axis",
+      "merchants": [
+        "flipkart"
+      ],
+      "issuers": [
+        "Axis"
+      ],
+      "percent": 10,
+      "maxBenefit": 1500,
+      "minTxn": 5000,
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31",
+      "event": "sale"
+    },
+    {
+      "id": "myntra_hdfc",
+      "title": "Sample: 10% instant off with HDFC",
+      "merchants": [
+        "myntra"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 10,
+      "maxBenefit": 750,
+      "minTxn": 3000,
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-15"
+    },
+    {
+      "id": "mmt_icici",
+      "title": "Sample: 12% off flights with ICICI",
+      "merchants": [
+        "makemytrip"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 12,
+      "maxBenefit": 5000,
+      "minTxn": 10000,
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31"
+    },
+    {
+      "id": "bms_sbi",
+      "title": "Sample: ₹250 off movie tickets with SBI Card",
+      "merchants": [
+        "bookmyshow"
+      ],
+      "issuers": [
+        "SBI Card"
+      ],
+      "flat": 250,
+      "minTxn": 500,
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31"
+    },
+    {
+      "id": "croma_hdfc",
+      "title": "Sample: 10% off electronics with HDFC",
+      "merchants": [
+        "croma"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 10,
+      "maxBenefit": 3000,
+      "minTxn": 20000,
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31"
+    },
+    {
+      "id": "blinkit_hsbc_weekend",
+      "title": "Sample: Weekend ₹100 off with HSBC",
+      "merchants": [
+        "blinkit"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "flat": 100,
+      "minTxn": 799,
+      "days": [
+        "SATURDAY",
+        "SUNDAY"
+      ],
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31"
+    },
+    {
+      "id": "swiggy_axis",
+      "title": "Sample: 15% off with Axis cards",
+      "merchants": [
+        "swiggy"
+      ],
+      "issuers": [
+        "Axis"
+      ],
+      "percent": 15,
+      "maxBenefit": 125,
+      "minTxn": 400,
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31"
+    },
+    {
+      "id": "tanishq_hdfc_emi",
+      "title": "Sample: 5% off gold jewellery on HDFC EMI",
+      "merchants": [
+        "tanishq"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "maxBenefit": 5000,
+      "minTxn": 25000,
+      "paymentModes": [
+        "EMI"
+      ],
+      "validFrom": "2026-11-01",
+      "validTo": "2026-12-31"
+    }
+  ],
+  "fees": [
+    {
+      "id": "fuel_surcharge",
+      "label": "1% fuel surcharge",
+      "percent": 1,
+      "categories": [
+        "fuel"
+      ],
+      "waivedBetween": [
+        400,
+        5000
+      ]
+    },
+    {
+      "id": "rent_fee",
+      "label": "1% rent payment fee",
+      "percent": 1,
+      "categories": [
+        "rent"
+      ]
+    },
+    {
+      "id": "wallet_fee",
+      "label": "1% wallet load fee",
+      "percent": 1,
+      "categories": [
+        "wallet_load"
+      ]
+    },
+    {
+      "id": "forex",
+      "label": "3.5% forex markup",
+      "percent": 3.5,
+      "channels": [
+        "INTERNATIONAL"
+      ],
+      "cards": [
+        "sbi_cashback",
+        "hdfc_millennia",
+        "swiggy_hdfc",
+        "flipkart_axis",
+        "axis_ace",
+        "hsbc_live_plus",
+        "sbi_simplyclick",
+        "hdfc_regalia_gold",
+        "hdfc_infinia",
+        "amex_mrcc",
+        "hdfc_millennia_diners",
+        "swiggy_ornge_hdfc",
+        "hdfc_upi_rupay",
+        "sbi_pulse",
+        "icici_platinum",
+        "icici_sapphiro"
+      ]
+    },
+    {
+      "id": "forex_apicici",
+      "label": "1.99% forex markup",
+      "percent": 1.99,
+      "channels": [
+        "INTERNATIONAL"
+      ],
+      "cards": [
+        "amazon_pay_icici"
+      ]
+    },
+    {
+      "id": "forex_neu",
+      "label": "2% forex markup",
+      "percent": 2,
+      "channels": [
+        "INTERNATIONAL"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ]
+    }
+  ]
+}

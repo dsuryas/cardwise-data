@@ -1,0 +1,30 @@
+{
+  "name": "cardwise-data",
+  "private": true,
+  "type": "module",
+  "description": "Daily pipeline that keeps CardWise's card rules and offers fresh, verified and signed.",
+  "scripts": {
+    "pipeline": "tsx src/run.ts",
+    "validate": "tsx src/cli-validate.ts",
+    "sign": "tsx src/cli-sign.ts",
+    "keygen": "tsx src/cli-keygen.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.11.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.65.1"
+  }
+}
