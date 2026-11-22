@@ -160,3 +160,19 @@ describe("signing", () => {
     expect(verifyBytes(Buffer.concat([bytes, Buffer.from(" ")]), sig, k.publicKeyRawB64)).toBe(false);
   });
 });
+
+it("a hanging source is abandoned after the deadline and the run continues", async () => {
+  process.env.SOURCE_TIMEOUT_MS = "50";
+  try {
+    const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+    const before = JSON.stringify(catalog.offers);
+    const hang = () => new Promise<never>(() => {});
+    const fetcher: Fetcher = async () => ({ status: 200, body: "<p>" + "offer text ".repeat(50) + "</p>", contentType: "text/html" });
+    const sources = [{ id: "slow", kind: "offers", url: "https://slow.example/x", issuer: "HDFC Bank" }] as Source[];
+    const res = await runPipeline(catalog, sources, { checkCard: hang, listOffers: hang }, "2026-11-22", fetcher);
+    expect(res.reportMd).toMatch(/slow skipped: gave up/);
+    expect(JSON.stringify(res.catalog.offers)).toBe(before);
+  } finally {
+    delete process.env.SOURCE_TIMEOUT_MS;
+  }
+});

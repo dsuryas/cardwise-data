@@ -31,6 +31,9 @@ export interface RunResult {
  * `pageHashes` (source id → hash of page text) lets unchanged pages skip the AI step entirely:
  * an unchanged card page just re-confirms the card; an unchanged offers page adds nothing new.
  */
+/** One slow or hanging site must never stall the whole run. */
+const sourceTimeoutMs = () => Number(process.env.SOURCE_TIMEOUT_MS ?? 240_000);
+
 export async function runPipeline(
   catalog: Catalog, sources: Source[], extractor: Extractor, today: string,
   fetcher: Fetcher = httpFetcher, pageHashes: Map<string, string> = new Map(),
@@ -40,12 +43,20 @@ export async function runPipeline(
   const robots = new Map<string, string>();
   let offerPagesRead = 0;
 
+  const log = (msg: string) => { if (!process.env.VITEST) console.log(`[${new Date().toISOString().slice(11, 19)}] ${msg}`); };
   for (const s of sources.filter((x) => x.enabled !== false)) {
+    const started = Date.now();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let abandoned = false; // set when the deadline wins; late results must not touch the catalog
+    const deadline = new Promise<never>((_, reject) => { const ms = sourceTimeoutMs(); timer = setTimeout(() => reject(new Error(`gave up after ${ms / 1000}s`)), ms); });
     try {
+      await Promise.race([deadline, (async () => {
+      log(`${s.id}: fetching ${s.url}`);
       const page = await fetchPage(s.url, fetcher, robots);
       if (page.text.length < 200) throw new Error("page has almost no text (needs USE_BROWSER=1?)");
       const hash = createHash("sha256").update(page.text).digest("hex");
       const unchanged = pageHashes.get(s.id) === hash;
+      if (unchanged) log(`${s.id}: page unchanged, AI skipped`);
       if (unchanged) {
         if (s.kind === "card" && s.cardId) {
           const card = catalog.cards.find((c) => c.id === s.cardId);
@@ -55,22 +66,30 @@ export async function runPipeline(
           }
         }
         if (s.kind === "offers") offerPagesRead++;
-        continue;
+        return;
       }
       if (s.kind === "card" && s.cardId) {
         const card = catalog.cards.find((c) => c.id === s.cardId);
         if (!card) throw new Error(`unknown card ${s.cardId}`);
         const check = await extractor.checkCard(card, catalog, page.text);
+        if (abandoned) return;
         changes.push(...applyCardCheck(catalog, s.cardId, check, page.text, s.url, today));
       } else if (s.kind === "offers") {
         const offers = await extractor.listOffers(catalog, page.text, today, { issuer: s.issuer, merchantId: s.merchantId });
+        if (abandoned) return;
         changes.push(...mergeOffers(catalog, offers, page.text, s.url, today));
         offerPagesRead++;
       }
       // Only remember the page once it was fully processed, so a failed run retries it tomorrow.
       pageHashes.set(s.id, hash);
+      })()]);
+      log(`${s.id}: done in ${Math.round((Date.now() - started) / 1000)}s`);
     } catch (e) {
+      abandoned = true;
+      log(`${s.id}: skipped after ${Math.round((Date.now() - started) / 1000)}s: ${(e as Error).message}`);
       changes.push({ level: "INFO", what: `source ${s.id} skipped: ${(e as Error).message}`, source: s.url });
+    } finally {
+      clearTimeout(timer);
     }
   }
   changes.push(...cleanOffers(catalog, today, offerPagesRead > 0));
@@ -97,6 +116,7 @@ async function main() {
   writeFileSync("out/report.md", result.reportMd);
   writeFileSync("out/summary.json", JSON.stringify({ changed: result.changed, risky: result.risky, version: result.catalog.version }));
   console.log(result.reportMd);
+  process.exit(0); // don't wait on any abandoned request still winding down
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

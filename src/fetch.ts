@@ -10,7 +10,7 @@ export interface PageText {
 export type Fetcher = (url: string) => Promise<{ status: number; body: string; contentType: string }>;
 
 export const httpFetcher: Fetcher = async (url) => {
-  const res = await fetch(url, { headers: { "user-agent": USER_AGENT, accept: "text/html,application/pdf;q=0.9,*/*;q=0.5" }, redirect: "follow" });
+  const res = await fetch(url, { headers: { "user-agent": USER_AGENT, accept: "text/html,application/pdf;q=0.9,*/*;q=0.5" }, redirect: "follow", signal: AbortSignal.timeout(30_000) });
   const contentType = res.headers.get("content-type") ?? "";
   const body = contentType.includes("pdf") ? "" : await res.text();
   return { status: res.status, body, contentType };
@@ -109,7 +109,9 @@ async function browserFetch(url: string): Promise<{ status: number; body: string
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ userAgent: USER_AGENT });
-    const res = await page.goto(url, { waitUntil: "networkidle", timeout: 45_000 });
+    // Bank portals keep analytics connections open, so "networkidle" may never come: load the DOM, then give scripts a moment.
+    const res = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
     return { status: res?.status() ?? 0, body: await page.content(), contentType: "text/html" };
   } finally {
     await browser.close();

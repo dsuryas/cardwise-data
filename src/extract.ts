@@ -151,7 +151,7 @@ export class OpenAICompatExtractor extends LlmExtractor {
 
   protected async tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
     let lastError: unknown;
-    for (let attempt = 0; attempt < 4; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/chat/completions`, {
           method: "POST",
@@ -163,7 +163,7 @@ export class OpenAICompatExtractor extends LlmExtractor {
             tools: [{ type: "function", function: { name, description, parameters: schema } }],
             tool_choice: this.forceStyle === "named" ? { type: "function", function: { name } } : "required",
           }),
-          signal: AbortSignal.timeout(180_000),
+          signal: AbortSignal.timeout(120_000),
         });
         if (res.status === 429 || res.status >= 500) throw new Error(`${this.label} API ${res.status}`);
         if (!res.ok) throw new FatalApiError(`${this.label} API ${res.status}: ${(await res.text()).slice(0, 300)}`);
