@@ -3,8 +3,9 @@
 //  RISKY → opened as a pull request for a human (any change to a card's rates, caps or minimums)
 //  INFO  → noted in the report only (rule not found on page, benefits we don't model, rejected extractions)
 import { createHash } from "node:crypto";
+import { pageContainsQuote } from "./fetch.ts";
 import type { Catalog, Offer } from "./schema.ts";
-import { acceptCheck, acceptOffer, type CardCheck, type ProposedOffer } from "./extract.ts";
+import { acceptCheck, acceptOffer, checkOfferDate, type CardCheck, type ProposedOffer } from "./extract.ts";
 
 export type Level = "SAFE" | "RISKY" | "INFO";
 export interface Change {
@@ -66,7 +67,8 @@ export function offerId(o: ProposedOffer): string {
 
 export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: string, sourceUrl: string, today: string): Change[] {
   const changes: Change[] = [];
-  for (const p of proposed) {
+  for (let p of proposed) {
+    const stableId = offerId(p); // from the extracted offer, so capping an unconfirmed date doesn't change its id
     const verdict = acceptOffer(pageText, p, today);
     if (!verdict.ok) {
       changes.push({ level: "INFO", what: `offer "${p.title}" rejected (${verdict.why})`, quote: p.quote, source: sourceUrl });
@@ -76,8 +78,13 @@ export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: str
       changes.push({ level: "INFO", what: `offer "${p.title}" for unknown merchant ${p.merchantId}`, source: sourceUrl });
       continue;
     }
+    const date = checkOfferDate(pageText, p, today);
+    if (!date.backed) {
+      changes.push({ level: "INFO", what: `offer "${p.title}": end date ${p.validTo} not confirmed on the page; kept until ${date.validTo} and re-read daily`, quote: p.dateQuote, source: sourceUrl });
+      p = { ...p, validTo: date.validTo };
+    }
     const offer: Offer = {
-      id: offerId(p),
+      id: stableId,
       title: p.title,
       merchants: [p.merchantId],
       ...(p.cardIds?.length ? { cards: p.cardIds } : { issuers: [p.issuer!] }),
@@ -101,6 +108,18 @@ export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: str
       changes.push({ level: "SAFE", what: `new offer: ${offer.title}`, quote: p.quote, source: sourceUrl });
     }
   }
+  return changes;
+}
+
+/** An offer whose page was re-read today but no longer carries its wording has been withdrawn. */
+export function dropVanishedOffers(c: Catalog, sourceUrl: string, pageText: string): Change[] {
+  const changes: Change[] = [];
+  c.offers = c.offers.filter((o) => {
+    if (o.source !== sourceUrl || !o.quote || o.title.startsWith("Sample:")) return true;
+    if (pageContainsQuote(pageText, o.quote)) return true;
+    changes.push({ level: "SAFE", what: `offer no longer listed, removed: ${o.title}`, source: sourceUrl });
+    return false;
+  });
   return changes;
 }
 

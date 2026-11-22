@@ -848,6 +848,9 @@
       "network": "MASTERCARD",
       "currency": "cashback",
       "annualFee": 1000,
+      "feeWaiverSpend": 100000,
+      "family": "hdfc_rewards",
+      "tier": 1,
       "excludes": [
         "fuel",
         "rent",
@@ -973,6 +976,7 @@
       "network": "RUPAY",
       "currency": "neucoins",
       "annualFee": 1499,
+      "feeWaiverSpend": 300000,
       "excludes": [
         "fuel",
         "rent",
@@ -1232,6 +1236,8 @@
       "network": "VISA",
       "currency": "hdfc_rp",
       "annualFee": 2500,
+      "family": "hdfc_rewards",
+      "tier": 2,
       "excludes": [
         "fuel",
         "rent",
@@ -1276,6 +1282,8 @@
       "network": "VISA",
       "currency": "hdfc_rp_premium",
       "annualFee": 12500,
+      "family": "hdfc_rewards",
+      "tier": 3,
       "excludes": [
         "fuel",
         "rent",
@@ -1326,6 +1334,9 @@
       "network": "DINERS",
       "currency": "cashback",
       "annualFee": 1000,
+      "feeWaiverSpend": 100000,
+      "family": "hdfc_rewards",
+      "tier": 1,
       "excludes": [
         "fuel",
         "rent",
@@ -1493,6 +1504,7 @@
       "network": "RUPAY",
       "currency": "hdfc_cashpoints_upi",
       "annualFee": 99,
+      "feeWaiverSpend": 25000,
       "excludes": [
         "fuel",
         "rent",
@@ -1602,6 +1614,8 @@
       "network": "VISA",
       "currency": "icici_rp",
       "annualFee": 0,
+      "family": "icici_cards",
+      "tier": 1,
       "excludes": [
         "fuel",
         "rent",
@@ -1641,6 +1655,8 @@
       "network": "VISA",
       "currency": "icici_rp",
       "annualFee": 3500,
+      "family": "icici_cards",
+      "tier": 2,
       "excludes": [
         "fuel",
         "rent",

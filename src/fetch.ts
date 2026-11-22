@@ -7,6 +7,25 @@ export interface PageText {
   fetchedAt: string;
   /** How we got it: plain HTTP, headless browser, or a PDF. */
   via: "http" | "browser" | "pdf";
+  /** Same-site links on the page (for following offer detail pages). */
+  links?: { href: string; text: string }[];
+}
+
+/** Same-host links with their visible text, de-duplicated. */
+export function extractLinks(html: string, baseUrl: string): { href: string; text: string }[] {
+  const base = new URL(baseUrl);
+  const seen = new Map<string, string>();
+  for (const m of html.matchAll(/<a\b[^>]*?href\s*=\s*["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
+    let u: URL;
+    try { u = new URL(m[1].replace(/&amp;/g, "&"), base); } catch { continue; }
+    if (u.host !== base.host || !/^https?:$/.test(u.protocol)) continue;
+    u.hash = "";
+    const href = u.toString();
+    if (href === base.toString()) continue;
+    const text = htmlToText(m[2]).replace(/\s+/g, " ").trim();
+    if (!seen.has(href) || (text && !seen.get(href))) seen.set(href, text);
+  }
+  return [...seen].map(([href, text]) => ({ href, text }));
 }
 
 export interface Fetched { status: number; body: string; contentType: string; bytes?: Uint8Array }
@@ -133,9 +152,9 @@ export async function fetchPage(url: string, fetcher: Fetcher = httpFetcher, rob
     if (rendered.status >= 400) throw new Error(`HTTP ${rendered.status} in browser${rendered.status === 403 ? " (blocked)" : ""}`);
     text = htmlToText(rendered.body);
     if (looksBlocked(text)) throw new Error("bot-check page returned in browser (blocked)");
-    return { url, text, fetchedAt: new Date().toISOString(), via: "browser" };
+    return { url, text, fetchedAt: new Date().toISOString(), via: "browser", links: extractLinks(rendered.body, url) };
   }
-  return { url, text, fetchedAt: new Date().toISOString(), via: "http" };
+  return { url, text, fetchedAt: new Date().toISOString(), via: "http", links: extractLinks(page.body, url) };
 }
 
 /** Below this much text a page is a shell that needs scripts (or a block page). */

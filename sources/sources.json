@@ -1,5 +1,5 @@
 {
-  "about": "Pages the daily pipeline reads. kind=card: re-check that card's rules. kind=offers: list offers. Each source tries `url`, then each of `fallbackUrls` in order (official terms PDFs and alternate bank pages), and uses the first that isn't blocked. robots.txt is always respected and bot checks are never bypassed. Add a source by appending an entry; set enabled=false to pause one. Check out/report.md's Sources table for which ones work.",
+  "about": "Pages the daily pipeline reads. kind=card: re-check that card's rules. kind=offers: list offers. Each source tries `url`, then each of `fallbackUrls` in order (official terms PDFs and alternate bank pages), and uses the first that isn't blocked. robots.txt is always respected and bot checks are never bypassed. Add a source by appending an entry; set enabled=false to pause one. Check out/report.md's Sources table for which ones work. Offer sources with followLinks also open up to `max` single-offer pages picked by the link scout.",
   "sources": [
     {
       "id": "amazon_pay_icici",
@@ -94,33 +94,82 @@
       "url": "https://www.icici.bank.in/offers",
       "fallbackUrls": [
         "https://www.icicibank.com/offers"
-      ]
+      ],
+      "followLinks": {
+        "max": 5,
+        "pattern": "/offers/"
+      }
+    },
+    {
+      "id": "offers_icici_lifestyle",
+      "kind": "offers",
+      "issuer": "ICICI",
+      "url": "https://www.icici.bank.in/offers/categories/lifestyle",
+      "followLinks": {
+        "max": 4,
+        "pattern": "/offers/"
+      }
+    },
+    {
+      "id": "offers_icici_electronics",
+      "kind": "offers",
+      "issuer": "ICICI",
+      "url": "https://www.icici.bank.in/offers/categories/category-listing/electronics",
+      "followLinks": {
+        "max": 4,
+        "pattern": "/offers/"
+      }
+    },
+    {
+      "id": "offers_icici_travel",
+      "kind": "offers",
+      "issuer": "ICICI",
+      "url": "https://www.icici.bank.in/offers/categories/category-listing/travel",
+      "followLinks": {
+        "max": 3,
+        "pattern": "/offers/"
+      }
     },
     {
       "id": "offers_sbi_card",
       "kind": "offers",
       "issuer": "SBI Card",
-      "url": "https://www.sbicard.com/en/personal/offers.page"
+      "url": "https://www.sbicard.com/en/personal/offers.page",
+      "followLinks": {
+        "max": 4,
+        "pattern": "/offers"
+      }
     },
     {
       "id": "offers_hdfc",
       "kind": "offers",
       "issuer": "HDFC",
-      "url": "https://offers.smartbuy.hdfcbank.com/offer_list",
-      "note": "JS-rendered"
+      "url": "https://www.hdfc.bank.in/offers",
+      "followLinks": {
+        "max": 4
+      },
+      "fallbackUrls": [
+        "https://offers.smartbuy.hdfcbank.com/offer_list"
+      ]
     },
     {
       "id": "offers_axis",
       "kind": "offers",
       "issuer": "Axis",
       "url": "https://grabdeals.axisbank.com/",
-      "note": "JS-rendered"
+      "note": "JS-rendered",
+      "followLinks": {
+        "max": 4
+      }
     },
     {
       "id": "offers_hsbc",
       "kind": "offers",
       "issuer": "HSBC",
-      "url": "https://www.hsbc.co.in/credit-cards/offers/"
+      "url": "https://www.hsbc.co.in/credit-cards/offers/",
+      "followLinks": {
+        "max": 3
+      }
     }
   ]
 }

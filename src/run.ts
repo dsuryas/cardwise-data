@@ -3,8 +3,10 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { applyCardCheck, cleanOffers, mergeOffers, report, type Change } from "./apply.ts";
-import { extractorFromEnv, type Extractor } from "./extract.ts";
+import { applyCardCheck, cleanOffers, dropVanishedOffers, mergeOffers, report, type Change } from "./apply.ts";
+import { acceptCheck, extractorFromEnv, type Extractor, type ProposedOffer } from "./extract.ts";
+
+const offerKey = (o: ProposedOffer) => `${o.merchantId}|${o.percent ?? ""}|${o.flat ?? ""}|${o.maxBenefit ?? ""}`;
 import { fetchPage, httpFetcher, type Fetcher, type PageText } from "./fetch.ts";
 import { nextVersion, validateCatalog, type Catalog } from "./schema.ts";
 
@@ -12,8 +14,10 @@ export interface Source {
   id: string;
   kind: "card" | "offers";
   url: string;
-  /** Tried in order if `url` is blocked or empty, e.g. the bank's terms PDF. */
+  /** Tried in order if `url` is blocked, empty, or (for cards) doesn't state the card's rates, e.g. the bank's terms PDF. */
   fallbackUrls?: string[];
+  /** Offer listing pages: open up to `max` single-offer pages whose URL contains `pattern` (picked by the link scout). */
+  followLinks?: { max: number; pattern?: string };
   cardId?: string;
   issuer?: string;
   merchantId?: string;
@@ -28,6 +32,8 @@ export interface SourceHealth {
   usedUrl?: string;
   chars?: number;
   seconds: number;
+  /** Offer detail pages opened via the link scout. */
+  detailPages?: number;
   error?: string;
   lastOk?: string;
   failStreak: number;
@@ -66,7 +72,7 @@ function healthTable(sources: Source[], health: Record<string, SourceHealth>): s
   const rows = sources.filter((x) => x.enabled !== false).map((s) => {
     const h = health[s.id];
     if (!h) return `| ${s.id} | – | not run | |`;
-    if (h.ok) return `| ${s.id} | ✅ | ${h.via}, ${h.chars} chars, ${h.seconds}s | ${h.usedUrl !== s.url ? "used fallback" : ""} |`;
+    if (h.ok) return `| ${s.id} | ✅ | ${h.via}, ${h.chars} chars, ${h.seconds}s${h.detailPages ? `, ${h.detailPages} offer pages` : ""} | ${h.usedUrl !== s.url ? "used fallback" : ""} |`;
     const since = h.failStreak > 1 ? `failing ${h.failStreak} runs${h.lastOk ? `, last OK ${h.lastOk}` : ""}` : "";
     return `| ${s.id} | ❌ | ${(h.error ?? "").slice(0, 160).replace(/\|/g, "/")} | ${since} |`;
   });
@@ -88,53 +94,145 @@ export async function runPipeline(
   let offerPagesRead = 0;
 
   const log = (msg: string) => { if (!process.env.VITEST) console.log(`[${new Date().toISOString().slice(11, 19)}] ${msg}`); };
+  const secs = (t: number) => Math.round((Date.now() - t) / 1000);
+  const hashOf = (text: string) => createHash("sha256").update(text).digest("hex");
+
+  // ---- Orchestrator: code decides what runs; Gemini workers only read and judge pages. ----
   for (const s of sources.filter((x) => x.enabled !== false)) {
     const started = Date.now();
     let timer: ReturnType<typeof setTimeout> | undefined;
     let abandoned = false; // set when the deadline wins; late results must not touch the catalog
-    const deadline = new Promise<never>((_, reject) => { const ms = sourceTimeoutMs(); timer = setTimeout(() => reject(new Error(`gave up after ${ms / 1000}s`)), ms); });
+    const budgetMs = sourceTimeoutMs() + (s.followLinks?.max ?? 0) * 90_000;
+    const deadline = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error(`gave up after ${Math.round(budgetMs / 1000)}s`)), budgetMs); });
+    // Work is staged here and applied to the catalog only once the whole source has finished.
+    const staged: (() => Change[])[] = [];
+    const stagedHashes: [string, string][] = [];
     try {
       await Promise.race([deadline, (async () => {
-      const page = await fetchFirstWorking(s, fetcher, robots, log);
-      log(`${s.id}: got ${page.text.length} chars via ${page.via} in ${Math.round((Date.now() - started) / 1000)}s`);
-      health[s.id] = { ok: true, via: page.via, usedUrl: page.url, chars: page.text.length, seconds: 0, failStreak: 0, lastOk: today };
-      const hash = createHash("sha256").update(page.text).digest("hex");
-      const unchanged = pageHashes.get(s.id) === hash;
-      if (unchanged) log(`${s.id}: page unchanged, AI skipped`);
-      if (unchanged) {
         if (s.kind === "card" && s.cardId) {
           const card = catalog.cards.find((c) => c.id === s.cardId);
-          if (card?.verified && card.checkedOn !== today) {
-            card.checkedOn = today;
-            changes.push({ level: "SAFE", what: `${card.name}: page unchanged since last check, re-confirmed`, source: s.url });
+          if (!card) throw new Error(`unknown card ${s.cardId}`);
+          const errors: string[] = [];
+          let lastWeak: (() => Change[]) | undefined;
+          let done = false;
+          for (const url of [s.url, ...(s.fallbackUrls ?? [])]) {
+            let page: PageText;
+            try {
+              log(`${s.id}: fetching ${url}`);
+              page = await fetchPage(url, fetcher, robots);
+              if (page.text.length < 200) throw new Error(`only ${page.text.length} chars of text`);
+            } catch (e) {
+              errors.push(`${new URL(url).hostname}: ${(e as Error).message}`);
+              log(`${s.id}:   failed: ${(e as Error).message}`);
+              continue;
+            }
+            log(`${s.id}: got ${page.text.length} chars via ${page.via} in ${secs(started)}s`);
+            health[s.id] = { ok: true, via: page.via, usedUrl: page.url, chars: page.text.length, seconds: 0, failStreak: 0, lastOk: today };
+            const key = `${s.id}@${url}`, hash = hashOf(page.text);
+            if (pageHashes.get(key) === hash) {
+              log(`${s.id}: page unchanged since it last confirmed the card, AI skipped`);
+              staged.push(() => {
+                if (!card.verified || card.checkedOn === today) return [];
+                card.checkedOn = today;
+                return [{ level: "SAFE", what: `${card.name}: page unchanged since last check, re-confirmed`, source: url }];
+              });
+              done = true;
+              break;
+            }
+            const check = await extractor.checkCard(card, catalog, page.text);
+            const strong = check.checks.filter((c) => c.status !== "not_found" && acceptCheck(page.text, c).ok).length;
+            const apply = () => applyCardCheck(catalog, card.id, check, page.text, url, today);
+            if (strong > 0) {
+              staged.push(apply);
+              stagedHashes.push([key, hash]);
+              done = true;
+              break;
+            }
+            log(`${s.id}: page doesn't state this card's rates; trying the next source`);
+            lastWeak = apply;
+          }
+          if (!done) {
+            if (lastWeak) staged.push(lastWeak);
+            else throw new Error(errors.join(" | ") || "no source worked");
+          }
+          return;
+        }
+
+        if (s.kind === "offers") {
+          const hint = { issuer: s.issuer, merchantId: s.merchantId };
+          const page = await fetchFirstWorking(s, fetcher, robots, log);
+          log(`${s.id}: got ${page.text.length} chars via ${page.via} in ${secs(started)}s`);
+          health[s.id] = { ok: true, via: page.via, usedUrl: page.url, chars: page.text.length, seconds: 0, failStreak: 0, lastOk: today };
+          staged.push(() => { offerPagesRead++; return []; });
+
+          const readOffers = async (pg: PageText, recall: boolean) => {
+            const found = await extractor.listOffers(catalog, pg.text, today, hint);
+            let all = found;
+            if (recall && extractor.listMissedOffers) {
+              const missed = await extractor.listMissedOffers(catalog, pg.text, today, hint, found);
+              const seen = new Set(found.map(offerKey));
+              const fresh = missed.filter((o) => !seen.has(offerKey(o)));
+              if (fresh.length) log(`${s.id}:   recall pass found ${fresh.length} more`);
+              all = [...found, ...fresh];
+            }
+            const notes: Change[] = [];
+            if (all.length && extractor.verifyOffers) {
+              const verdicts = await extractor.verifyOffers(catalog, pg.text, today, all);
+              const byIndex = new Map(verdicts.map((v) => [v.index, v]));
+              all = all.filter((o, i) => {
+                const v = byIndex.get(i);
+                if (v && !v.ok) { notes.push({ level: "INFO", what: `verifier rejected offer "${o.title}": ${v.reason}`, quote: o.quote, source: pg.url }); return false; }
+                return true;
+              });
+            }
+            log(`${s.id}:   ${all.length} offer(s) kept from ${pg.url}`);
+            return { offers: all, notes };
+          };
+
+          const listingKey = `${s.id}@${page.url}`, listingHash = hashOf(page.text);
+          if (pageHashes.get(listingKey) === listingHash) {
+            log(`${s.id}: listing unchanged, AI skipped`);
+          } else {
+            const { offers, notes } = await readOffers(page, true);
+            staged.push(() => [...notes, ...mergeOffers(catalog, offers, page.text, page.url, today), ...dropVanishedOffers(catalog, page.url, page.text)]);
+            stagedHashes.push([listingKey, listingHash]);
+          }
+
+          // Link scout → detail pages (each: extractor + verifier).
+          if (s.followLinks && page.links?.length && extractor.pickOfferLinks) {
+            const candidates = page.links.filter((l) => l.href !== page.url && (!s.followLinks!.pattern || l.href.includes(s.followLinks!.pattern)));
+            const picked = await extractor.pickOfferLinks(catalog, candidates, hint, s.followLinks.max);
+            log(`${s.id}: link scout picked ${picked.length} of ${candidates.length} links`);
+            let opened = 0;
+            for (const href of picked) {
+              try {
+                const detail = await fetchPage(href, fetcher, robots);
+                opened++;
+                const key = `${s.id}@${href}`, hash = hashOf(detail.text);
+                if (pageHashes.get(key) === hash) { log(`${s.id}:   ${href} unchanged, AI skipped`); continue; }
+                const { offers, notes } = await readOffers(detail, false);
+                staged.push(() => [...notes, ...mergeOffers(catalog, offers, detail.text, href, today), ...dropVanishedOffers(catalog, href, detail.text)]);
+                stagedHashes.push([key, hash]);
+              } catch (e) {
+                staged.push(() => [{ level: "INFO", what: `offer page skipped: ${(e as Error).message}`, source: href }]);
+              }
+            }
+            health[s.id].detailPages = opened;
           }
         }
-        if (s.kind === "offers") offerPagesRead++;
-        return;
-      }
-      if (s.kind === "card" && s.cardId) {
-        const card = catalog.cards.find((c) => c.id === s.cardId);
-        if (!card) throw new Error(`unknown card ${s.cardId}`);
-        const check = await extractor.checkCard(card, catalog, page.text);
-        if (abandoned) return;
-        changes.push(...applyCardCheck(catalog, s.cardId, check, page.text, s.url, today));
-      } else if (s.kind === "offers") {
-        const offers = await extractor.listOffers(catalog, page.text, today, { issuer: s.issuer, merchantId: s.merchantId });
-        if (abandoned) return;
-        changes.push(...mergeOffers(catalog, offers, page.text, s.url, today));
-        offerPagesRead++;
-      }
-      // Only remember the page once it was fully processed, so a failed run retries it tomorrow.
-      pageHashes.set(s.id, hash);
       })()]);
-      log(`${s.id}: done in ${Math.round((Date.now() - started) / 1000)}s`);
-      health[s.id].seconds = Math.round((Date.now() - started) / 1000);
+      if (abandoned) continue;
+      for (const run of staged) changes.push(...run());
+      // Only remember pages once fully processed, so a failed run retries them tomorrow.
+      for (const [k, h] of stagedHashes) pageHashes.set(k, h);
+      log(`${s.id}: done in ${secs(started)}s`);
+      if (health[s.id]) health[s.id].seconds = secs(started);
     } catch (e) {
       abandoned = true;
-      log(`${s.id}: skipped after ${Math.round((Date.now() - started) / 1000)}s: ${(e as Error).message}`);
+      log(`${s.id}: skipped after ${secs(started)}s: ${(e as Error).message}`);
       changes.push({ level: "INFO", what: `source ${s.id} skipped: ${(e as Error).message}`, source: s.url });
       const prev = previousHealth[s.id];
-      health[s.id] = { ...(health[s.id] ?? {}), ok: false, error: (e as Error).message, seconds: Math.round((Date.now() - started) / 1000),
+      health[s.id] = { ...(health[s.id] ?? {}), ok: false, error: (e as Error).message, seconds: secs(started),
         failStreak: (prev?.failStreak ?? 0) + 1, lastOk: prev?.lastOk };
     } finally {
       clearTimeout(timer);

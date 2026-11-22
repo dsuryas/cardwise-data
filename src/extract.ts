@@ -37,11 +37,26 @@ export interface ProposedOffer {
   paymentModes?: ("FULL" | "EMI")[];
   days?: string[];
   quote: string;
+  /** Verbatim page text stating when the offer ends ("Valid till 31st Dec 2026", "34 days left"). */
+  dateQuote?: string;
 }
 
+export interface OfferHint { issuer?: string; merchantId?: string }
+export interface OfferVerdict { index: number; ok: boolean; reason: string }
+
+/**
+ * Workers the orchestrator (run.ts) dispatches. Only checkCard and listOffers are required;
+ * the rest strengthen recall and precision when the provider supports them.
+ */
 export interface Extractor {
   checkCard(card: Card, catalog: Catalog, pageText: string): Promise<CardCheck>;
-  listOffers(catalog: Catalog, pageText: string, today: string, hint: { issuer?: string; merchantId?: string }): Promise<ProposedOffer[]>;
+  listOffers(catalog: Catalog, pageText: string, today: string, hint: OfferHint): Promise<ProposedOffer[]>;
+  /** Recall worker: an independent second read, told what was already found, asked only for what's missing. */
+  listMissedOffers?(catalog: Catalog, pageText: string, today: string, hint: OfferHint, found: ProposedOffer[]): Promise<ProposedOffer[]>;
+  /** Verifier: adversarially re-checks each offer against the page. */
+  verifyOffers?(catalog: Catalog, pageText: string, today: string, offers: ProposedOffer[]): Promise<OfferVerdict[]>;
+  /** Link scout: picks which offer-detail pages are worth opening. */
+  pickOfferLinks?(catalog: Catalog, links: { href: string; text: string }[], hint: OfferHint, max: number): Promise<string[]>;
 }
 
 const MAX_PAGE_CHARS = 60_000;
@@ -94,20 +109,9 @@ abstract class LlmExtractor implements Extractor {
     }, prompt);
   }
 
-  async listOffers(catalog: Catalog, pageText: string, today: string, hint: { issuer?: string; merchantId?: string }): Promise<ProposedOffer[]> {
+  private offerSchema(catalog: Catalog): Record<string, unknown> {
     const issuers = [...new Set(catalog.cards.map((c) => c.issuer))];
-    const prompt = [
-      `List the credit-card offers on this page that are valid on or after ${today}.`,
-      hint.issuer ? `The page belongs to the card issuer "${hint.issuer}".` : "",
-      hint.merchantId ? `The page belongs to the merchant id "${hint.merchantId}".` : "",
-      `Use ONLY these merchant ids (skip offers for other merchants): ${catalog.merchants.map((m) => `${m.id}=${m.name}`).join(", ")}.`,
-      `Use ONLY these issuer names: ${issuers.join(", ")}. If an offer is limited to specific cards, use these card ids: ${catalog.cards.map((c) => `${c.id}=${c.name}`).join(", ")}.`,
-      `Dates as YYYY-MM-DD. Skip offers without a clear end date. "quote" must be copied character-for-character from the page and contain the offer's numbers.`,
-      ``,
-      `PAGE TEXT:`,
-      pageText.slice(0, MAX_PAGE_CHARS),
-    ].filter(Boolean).join("\n");
-    const out = await this.tool<{ offers: ProposedOffer[] }>("report_offers", "Report the offers found", {
+    return {
       type: "object",
       required: ["offers"],
       properties: {
@@ -115,7 +119,7 @@ abstract class LlmExtractor implements Extractor {
           type: "array",
           items: {
             type: "object",
-            required: ["title", "merchantId", "validFrom", "validTo", "quote"],
+            required: ["title", "merchantId", "validFrom", "validTo", "quote", "dateQuote"],
             properties: {
               title: { type: "string" },
               merchantId: { type: "string", enum: catalog.merchants.map((m) => m.id) },
@@ -126,12 +130,86 @@ abstract class LlmExtractor implements Extractor {
               paymentModes: { type: "array", items: { type: "string", enum: ["FULL", "EMI"] } },
               days: { type: "array", items: { type: "string", enum: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] } },
               quote: { type: "string" },
+              dateQuote: { type: "string" },
             },
           },
         },
       },
-    }, prompt);
+    };
+  }
+
+  private offerRules(catalog: Catalog, today: string, hint: OfferHint): string[] {
+    const issuers = [...new Set(catalog.cards.map((c) => c.issuer))];
+    return [
+      hint.issuer ? `The page belongs to the card issuer "${hint.issuer}".` : "",
+      hint.merchantId ? `The page belongs to the merchant id "${hint.merchantId}".` : "",
+      `Use ONLY these merchant ids (skip offers for other merchants): ${catalog.merchants.map((m) => `${m.id}=${m.name}`).join(", ")}.`,
+      `Use ONLY these issuer names: ${issuers.join(", ")}. If an offer is limited to specific cards, use these card ids: ${catalog.cards.map((c) => `${c.id}=${c.name}`).join(", ")}.`,
+      `Only credit-card offers (skip offers that are debit-card or net-banking only).`,
+      `Today is ${today}. Dates as YYYY-MM-DD. If the page says "N days left", validTo = today + N days. If it gives no end date at all, skip the offer.`,
+      `"quote" must be copied character-for-character from the page and contain the offer's numbers. "dateQuote" must be copied character-for-character from the page and state the end date or the days left.`,
+    ].filter(Boolean);
+  }
+
+  /** Extractor worker. */
+  async listOffers(catalog: Catalog, pageText: string, today: string, hint: OfferHint): Promise<ProposedOffer[]> {
+    const prompt = [
+      `List the credit-card offers on this page that are still valid on ${today}.`,
+      ...this.offerRules(catalog, today, hint),
+      ``, `PAGE TEXT:`, pageText.slice(0, MAX_PAGE_CHARS),
+    ].join("\n");
+    const out = await this.tool<{ offers: ProposedOffer[] }>("report_offers", "Report the offers found", this.offerSchema(catalog), prompt);
     return out.offers ?? [];
+  }
+
+  /** Recall worker. */
+  async listMissedOffers(catalog: Catalog, pageText: string, today: string, hint: OfferHint, found: ProposedOffer[]): Promise<ProposedOffer[]> {
+    const prompt = [
+      `Another reader already extracted the offers listed below from this page. Your only job is to find credit-card offers it MISSED.`,
+      `Read the whole page carefully, including tables and fine print. Return only offers that are not already in the list (an empty list is fine).`,
+      ...this.offerRules(catalog, today, hint),
+      ``, `ALREADY FOUND:`,
+      found.length ? found.map((o) => `- ${o.title} | ${o.merchantId} | ${o.percent ?? ""}${o.percent !== undefined ? "%" : ""}${o.flat !== undefined ? `₹${o.flat}` : ""} | ends ${o.validTo}`).join("\n") : "(nothing)",
+      ``, `PAGE TEXT:`, pageText.slice(0, MAX_PAGE_CHARS),
+    ].join("\n");
+    const out = await this.tool<{ offers: ProposedOffer[] }>("report_missed_offers", "Report only the offers that were missed", this.offerSchema(catalog), prompt);
+    return out.offers ?? [];
+  }
+
+  /** Verifier worker. */
+  async verifyOffers(catalog: Catalog, pageText: string, today: string, offers: ProposedOffer[]): Promise<OfferVerdict[]> {
+    if (!offers.length) return [];
+    const prompt = [
+      `You are an auditor. Each offer below was extracted from the page by someone else and may be wrong.`,
+      `For each, check against the page: is it really a credit-card offer; is the merchant right; are the percent / flat amount / maximum benefit / minimum transaction exactly as the page states;`,
+      `is the end date right (today is ${today}; "N days left" means today + N); if issuer or card ids are given, does the page support them.`,
+      `ok=true only if every given field is supported by the page. Give a short reason either way.`,
+      ``, `OFFERS:`,
+      offers.map((o, i) => `${i}. ${JSON.stringify({ title: o.title, merchantId: o.merchantId, issuer: o.issuer, cardIds: o.cardIds, percent: o.percent, flat: o.flat, maxBenefit: o.maxBenefit, minTxn: o.minTxn, validFrom: o.validFrom, validTo: o.validTo, paymentModes: o.paymentModes, days: o.days })}`).join("\n"),
+      ``, `Merchant ids: ${catalog.merchants.map((m) => `${m.id}=${m.name}`).join(", ")}`,
+      ``, `PAGE TEXT:`, pageText.slice(0, MAX_PAGE_CHARS),
+    ].join("\n");
+    const out = await this.tool<{ verdicts: OfferVerdict[] }>("report_verdicts", "Report a verdict for every offer", {
+      type: "object", required: ["verdicts"],
+      properties: { verdicts: { type: "array", items: { type: "object", required: ["index", "ok", "reason"], properties: { index: { type: "integer" }, ok: { type: "boolean" }, reason: { type: "string" } } } } },
+    }, prompt);
+    return out.verdicts ?? [];
+  }
+
+  /** Link scout worker. */
+  async pickOfferLinks(catalog: Catalog, links: { href: string; text: string }[], hint: OfferHint, max: number): Promise<string[]> {
+    if (!links.length || max <= 0) return [];
+    const prompt = [
+      `These links are from a${hint.issuer ? ` ${hint.issuer}` : ""} credit-card offers listing page. Pick up to ${max} links that open a SINGLE offer's detail/terms page`,
+      `for one of these merchants: ${catalog.merchants.map((m) => m.name).join(", ")}. Prefer credit-card offers and bigger brands. Skip category, filter, login and generic pages.`,
+      `Return the hrefs exactly as given.`,
+      ``, links.slice(0, 300).map((l) => `- ${l.href} | ${l.text.slice(0, 100)}`).join("\n"),
+    ].join("\n");
+    const out = await this.tool<{ links: string[] }>("pick_links", "Return the chosen hrefs", {
+      type: "object", required: ["links"], properties: { links: { type: "array", items: { type: "string" } } },
+    }, prompt);
+    const allowed = new Set(links.map((l) => l.href));
+    return (out.links ?? []).filter((h) => allowed.has(h)).slice(0, max);
   }
 }
 
@@ -198,7 +276,7 @@ export class OpenAICompatExtractor extends LlmExtractor {
 export class GeminiExtractor extends LlmExtractor {
   retryDelayMs = 20_000;
   /** Free tier allows ~15 requests/minute on Flash-Lite: keep calls at least this far apart. */
-  minGapMs = 5_000;
+  minGapMs = 6_000;
   private lastCall = 0;
   private noThinking = new Set<string>();
   private exhausted = new Set<string>();
@@ -337,6 +415,40 @@ export function acceptCheck(pageText: string, c: RuleCheck): { ok: boolean; why?
     return { ok: false, why: "new numbers not present in the quote" };
   }
   return { ok: true };
+}
+
+const MONTHS: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 };
+
+function addDays(iso: string, n: number): string {
+  const d = new Date(iso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Every end date a snippet of page text could mean, as YYYY-MM-DD. Handles "34 days left", "31st Dec 2026", "Dec 31, 2026", "31/12/2026", "31 Dec'26". */
+export function datesInText(text: string, today: string): string[] {
+  const out = new Set<string>();
+  const t = text.replace(/[’‘]/g, "'");
+  const iso = (y: number, m: number, d: number) => (y < 100 ? 2000 + y : y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+  for (const m of t.matchAll(/(\d+)\s*days?\s*(left|remaining|to go)/gi)) out.add(addDays(today, Number(m[1])));
+  for (const m of t.matchAll(/(\d{1,2})(?:st|nd|rd|th)?[\s\-]*([A-Za-z]{3,9})[\s,'\-]*(\d{2,4})/g)) {
+    const mo = MONTHS[m[2].toLowerCase().slice(0, m[2].toLowerCase().startsWith("sept") ? 4 : 3)];
+    if (mo) out.add(iso(Number(m[3]), mo, Number(m[1])));
+  }
+  for (const m of t.matchAll(/([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?,?\s*'?(\d{2,4})/g)) {
+    const mo = MONTHS[m[1].toLowerCase().slice(0, 3)];
+    if (mo) out.add(iso(Number(m[3]), mo, Number(m[2])));
+  }
+  for (const m of t.matchAll(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/g)) out.add(iso(Number(m[3]), Number(m[2]), Number(m[1])));
+  return [...out];
+}
+
+/** How much to trust an offer's end date. Unbacked dates aren't rejected, but cut to a week so they're re-read soon. */
+export function checkOfferDate(pageText: string, o: ProposedOffer, today: string): { backed: boolean; validTo: string } {
+  const evidence = o.dateQuote && pageContainsQuote(pageText, o.dateQuote) ? o.dateQuote : "";
+  if (evidence && datesInText(evidence, today).includes(o.validTo)) return { backed: true, validTo: o.validTo };
+  const capped = addDays(today, 7);
+  return { backed: false, validTo: o.validTo < capped ? o.validTo : capped };
 }
 
 export function acceptOffer(pageText: string, o: ProposedOffer, today: string): { ok: boolean; why?: string } {
