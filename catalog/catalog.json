@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.22-1",
+  "version": "2026.11.22-2",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
@@ -1729,6 +1729,182 @@
       "validTo": "2026-12-31",
       "source": "https://www.hsbc.co.in/credit-cards/offers/bookmyshow-saturday/",
       "quote": "10% off up to ₹1000 on booking live event tickets i.e. live music shows, concerts, plays, sports, activities, and workshops.",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "makemytrip_icici_0124e7b2",
+      "title": "Get Up To 15% Instant Discount",
+      "merchants": [
+        "makemytrip"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 15,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get Up To 15% Instant Discount",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "tata_cliq_icici_96bdea63",
+      "title": "Get 10% Instant Discount",
+      "merchants": [
+        "tata_cliq"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 10,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get 10% Instant Discount",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "tata_cliq_icici_f233bfba",
+      "title": "10% Off on Weekend Shopping",
+      "merchants": [
+        "tata_cliq"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 10,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "10% Off on Weekend Shopping",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "easemytrip_icici_39b46263",
+      "title": "Get Up To 20% Off",
+      "merchants": [
+        "easemytrip"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 20,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get Up To 20% Off",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "ixigo_icici_fd1396a0",
+      "title": "Get 12% Discount on Flights",
+      "merchants": [
+        "ixigo"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 12,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get 12% Discount on Flights",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "nykaa_hsbc_b23c7428",
+      "title": "Nykaa",
+      "merchants": [
+        "nykaa"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 10,
+      "maxBenefit": 1000,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 10% off up to INR 1,000 on Nykaa Beauty and Nykaa Fashion.",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "bookmyshow_hsbc_e500f423",
+      "title": "BookMyShow Lounge",
+      "merchants": [
+        "bookmyshow"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 10,
+      "days": [
+        "SATURDAY"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 10% off live events and get buy-one-get-one-free movie tickets on Saturdays with your HSBC credit card.",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "zomato_hsbc_0ec47d66",
+      "title": "District by Zomato",
+      "merchants": [
+        "zomato"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 10,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Save 10% on dining, activities and shopping. Plus, enjoy buy-one-get-one cinema tickets for less and enjoy movies on the big screen for less.",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "bookmyshow_hsbc_72e1abf7",
+      "title": "10% off on live events",
+      "merchants": [
+        "bookmyshow"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 10,
+      "maxBenefit": 1000,
+      "paymentModes": [
+        "FULL"
+      ],
+      "days": [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+      ],
+      "validFrom": "2026-07-01",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/bookmyshow-saturday/",
+      "quote": "10% off on live events, up to ₹1000/month on all HSBC Credit Cards on all day of the week",
       "checkedOn": "2026-11-22"
     }
   ],
