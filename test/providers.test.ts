@@ -3,7 +3,7 @@ import { GeminiExtractor, GrokExtractor, extractorFromEnv } from "../src/extract
 import type { Catalog } from "../src/schema.ts";
 import { readFileSync } from "node:fs";
 
-const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+const catalog = JSON.parse(readFileSync("test/fixtures/catalog.json", "utf8")) as Catalog;
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 test("Grok: forces the tool, sends the schema, parses arguments", async () => {

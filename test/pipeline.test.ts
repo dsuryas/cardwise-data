@@ -7,7 +7,7 @@ import { runPipeline, type Source } from "../src/run.ts";
 import { nextVersion, validateCatalog, type Catalog } from "../src/schema.ts";
 import { generateKeys, publicKeyFromPrivate, signBytes, verifyBytes } from "../src/sign.ts";
 
-const load = (): Catalog => JSON.parse(readFileSync("catalog/catalog.json", "utf8"));
+const load = (): Catalog => JSON.parse(readFileSync("test/fixtures/catalog.json", "utf8"));
 const TODAY = "2026-11-20";
 
 describe("schema", () => {
@@ -164,7 +164,7 @@ describe("signing", () => {
   it("round-trips and rejects tampering", () => {
     const k = generateKeys();
     expect(publicKeyFromPrivate(k.privateKeyB64)).toBe(k.publicKeyRawB64);
-    const bytes = readFileSync("catalog/catalog.json");
+    const bytes = readFileSync("test/fixtures/catalog.json");
     const sig = signBytes(bytes, k.privateKeyB64);
     expect(verifyBytes(bytes, sig, k.publicKeyRawB64)).toBe(true);
     expect(verifyBytes(Buffer.concat([bytes, Buffer.from(" ")]), sig, k.publicKeyRawB64)).toBe(false);
@@ -174,7 +174,7 @@ describe("signing", () => {
 it("a hanging source is abandoned after the deadline and the run continues", async () => {
   process.env.SOURCE_TIMEOUT_MS = "50";
   try {
-    const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+    const catalog = JSON.parse(readFileSync("test/fixtures/catalog.json", "utf8")) as Catalog;
     const before = JSON.stringify(catalog.offers);
     const hang = () => new Promise<never>(() => {});
     const fetcher: Fetcher = async () => ({ status: 200, body: "<p>" + "offer text ".repeat(50) + "</p>", contentType: "text/html" });
@@ -191,7 +191,7 @@ describe("sources that allow it", () => {
   const html = (t: string) => `<html><body><p>${t}</p></body></html>`;
 
   it("falls back to the next URL when the first is blocked, and records it", async () => {
-    const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+    const catalog = JSON.parse(readFileSync("test/fixtures/catalog.json", "utf8")) as Catalog;
     const fetcher: Fetcher = async (url) => {
       if (url.endsWith("/robots.txt")) return { status: 404, body: "", contentType: "text/plain" };
       if (url.includes("blocked")) return { status: 403, body: "Access Denied", contentType: "text/html" };
@@ -205,7 +205,7 @@ describe("sources that allow it", () => {
   });
 
   it("counts consecutive failures across runs", async () => {
-    const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+    const catalog = JSON.parse(readFileSync("test/fixtures/catalog.json", "utf8")) as Catalog;
     const fetcher: Fetcher = async (url) => url.endsWith("/robots.txt")
       ? { status: 404, body: "", contentType: "text/plain" }
       : { status: 200, body: html("Access Denied. Reference #18.2f3c1702.1732250000.5b1a"), contentType: "text/html" };

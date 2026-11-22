@@ -267,14 +267,20 @@ async function main() {
   const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
   const sources = JSON.parse(readFileSync("sources/sources.json", "utf8")).sources as Source[];
   const cachePath = process.env.PAGE_CACHE ?? ".cache/pages.json";
-  const hashes = new Map<string, string>(existsSync(cachePath) ? Object.entries(JSON.parse(readFileSync(cachePath, "utf8"))) : []);
+  // The page cache is only valid for the catalog it produced. If the live catalog differs (a run whose
+  // results went to an unmerged review PR, or a manual edit), forget it so every page is read again.
+  const cached = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, "utf8")) : {};
+  const cacheValid = cached && cached.catalogVersion === catalog.version && cached.hashes;
+  if (!cacheValid && existsSync(cachePath)) console.log(`page cache is for catalog ${cached?.catalogVersion ?? "unknown"}, live is ${catalog.version}: re-reading every page`);
+  const hashes = new Map<string, string>(cacheValid ? Object.entries(cached.hashes) : []);
   const healthPath = ".cache/health.json";
   const prevHealth = existsSync(healthPath) ? JSON.parse(readFileSync(healthPath, "utf8")) : {};
   const result = await runPipeline(catalog, sources, extractorFromEnv(), today, httpFetcher, hashes, prevHealth);
   mkdirSync(".cache", { recursive: true });
   writeFileSync(healthPath, JSON.stringify(result.health, null, 2));
   mkdirSync(dirname(cachePath), { recursive: true });
-  writeFileSync(cachePath, JSON.stringify(Object.fromEntries(hashes), null, 2));
+  // Remember which catalog these hashes describe: the one now going live.
+  writeFileSync(cachePath, JSON.stringify({ catalogVersion: result.catalog.version, hashes: Object.fromEntries(hashes) }, null, 2));
   mkdirSync("out", { recursive: true });
   if (result.changed) writeFileSync("catalog/catalog.json", JSON.stringify(result.catalog, null, 2) + "\n");
   writeFileSync("out/report.md", result.reportMd);

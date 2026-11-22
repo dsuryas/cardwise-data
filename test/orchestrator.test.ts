@@ -7,7 +7,7 @@ import { runPipeline, type Source } from "../src/run.ts";
 import type { Catalog } from "../src/schema.ts";
 
 const TODAY = "2026-11-22";
-const load = () => JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+const load = () => JSON.parse(readFileSync("test/fixtures/catalog.json", "utf8")) as Catalog;
 const html = (body: string) => `<html><body>${body}</body></html>`;
 const pad = " Terms and conditions apply to all offers listed on this page. ".repeat(8);
 
