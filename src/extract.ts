@@ -190,12 +190,65 @@ export class OpenAICompatExtractor extends LlmExtractor {
   retryDelayMs = 15_000;
 }
 
-/** Google Gemini via AI Studio's free tier (OpenAI-compatible endpoint). Default. */
-export class GeminiExtractor extends OpenAICompatExtractor {
-  constructor(model = process.env.GEMINI_MODEL || "gemini-flash-latest", apiKey = process.env.GEMINI_API_KEY,
-    baseUrl = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai") {
-    // Low thinking keeps extraction fast; it's copying numbers and quotes, not solving puzzles.
-    super("Gemini", model, apiKey, baseUrl, "required", { reasoning_effort: process.env.GEMINI_REASONING ?? "low" });
+/**
+ * Google Gemini via AI Studio's free tier, using Gemini's own JSON-output mode
+ * (generateContent + responseJsonSchema). Forced function calls through the
+ * OpenAI-compatibility layer were timing out; native structured output is the supported path.
+ */
+export class GeminiExtractor extends LlmExtractor {
+  retryDelayMs = 15_000;
+  private thinking = true;
+  constructor(
+    private model = process.env.GEMINI_MODEL || "gemini-flash-latest",
+    private apiKey = process.env.GEMINI_API_KEY,
+    private baseUrl = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta",
+  ) {
+    super();
+    if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+  }
+
+  protected async tool<T>(_name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const t0 = Date.now();
+      try {
+        const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/models/${encodeURIComponent(this.model)}:generateContent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": this.apiKey! },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: `${prompt}\n\nRespond with JSON only: ${description}.` }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseJsonSchema: schema,
+              maxOutputTokens: 8192,
+              temperature: 0,
+              ...(this.thinking ? { thinkingConfig: { thinkingLevel: process.env.GEMINI_THINKING ?? "low" } } : {}),
+            },
+          }),
+          signal: AbortSignal.timeout(90_000),
+        });
+        if (!process.env.VITEST) console.log(`    Gemini ${this.model} attempt ${attempt + 1}: HTTP ${res.status} in ${Math.round((Date.now() - t0) / 1000)}s`);
+        if (res.status === 400 && this.thinking) {
+          const text = await res.text();
+          if (/thinking/i.test(text)) { this.thinking = false; attempt--; continue; } // older model: no thinking levels
+          throw new FatalApiError(`Gemini API 400: ${text.slice(0, 300)}`);
+        }
+        if (res.status === 429 || res.status >= 500) throw new Error(`Gemini API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        if (!res.ok) throw new FatalApiError(`Gemini API ${res.status}: ${(await res.text()).slice(0, 300)}`);
+        const body = (await res.json()) as { candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[]; promptFeedback?: { blockReason?: string } };
+        if (body.promptFeedback?.blockReason) throw new FatalApiError(`Gemini blocked the prompt: ${body.promptFeedback.blockReason}`);
+        const cand = body.candidates?.[0];
+        const text = (cand?.content?.parts ?? []).filter((p) => !p.thought && p.text).map((p) => p.text).join("");
+        if (!text) throw new Error(`no answer (finishReason ${cand?.finishReason ?? "unknown"})`);
+        return JSON.parse(text) as T;
+      } catch (e) {
+        if (e instanceof FatalApiError) throw e;
+        if (!process.env.VITEST) console.log(`    Gemini attempt ${attempt + 1} failed after ${Math.round((Date.now() - t0) / 1000)}s: ${(e as Error).message}`);
+        lastError = e;
+        await new Promise((r) => setTimeout(r, this.retryDelayMs * (attempt + 1)));
+      }
+    }
+    throw lastError;
   }
 }
 

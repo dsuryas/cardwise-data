@@ -29,23 +29,39 @@ test("Grok: a 401 fails fast instead of retrying", async () => {
   expect(fetchMock).toHaveBeenCalledTimes(1);
 });
 
-test("Gemini: uses the OpenAI-compatible endpoint and tool_choice required", async () => {
+const geminiReply = (obj: unknown) => new Response(JSON.stringify({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: "thinking...", thought: true }, { text: JSON.stringify(obj) }] } }] }));
+
+test("Gemini: native JSON mode with the schema, key in header, thoughts ignored", async () => {
   const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
-    expect(JSON.parse(String(init.body)).tool_choice).toBe("required");
-    return new Response(JSON.stringify({ choices: [{ message: { tool_calls: [{ function: { name: "report_offers", arguments: "{\"offers\":[]}" } }] } }] }));
+    const body = JSON.parse(String(init.body));
+    expect(body.generationConfig.responseMimeType).toBe("application/json");
+    expect(body.generationConfig.responseJsonSchema.required).toContain("offers");
+    expect(body.generationConfig.thinkingConfig).toEqual({ thinkingLevel: "low" });
+    expect((init.headers as Record<string, string>)["x-goog-api-key"]).toBe("g");
+    return geminiReply({ offers: [] });
   });
   vi.stubGlobal("fetch", fetchMock);
   expect(await new GeminiExtractor("gemini-test", "g").listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
-  expect(fetchMock.mock.calls[0][0]).toBe("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions");
+  expect(fetchMock.mock.calls[0][0]).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-test:generateContent");
 });
 
 test("Gemini: retries a 429 then succeeds", async () => {
   let n = 0;
-  vi.stubGlobal("fetch", vi.fn(async () => (++n === 1 ? new Response("slow down", { status: 429 })
-    : new Response(JSON.stringify({ choices: [{ message: { tool_calls: [{ function: { name: "report_offers", arguments: "{\"offers\":[]}" } }] } }] })))));
+  vi.stubGlobal("fetch", vi.fn(async () => (++n === 1 ? new Response("slow down", { status: 429 }) : geminiReply({ offers: [] }))));
   const g = new GeminiExtractor("m", "g"); g.retryDelayMs = 1;
   expect(await g.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
   expect(n).toBe(2);
+});
+
+test("Gemini: drops thinkingLevel for models that don't support it", async () => {
+  const seen: unknown[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (_u: string, init: RequestInit) => {
+    const cfg = JSON.parse(String(init.body)).generationConfig;
+    seen.push(cfg.thinkingConfig);
+    return cfg.thinkingConfig ? new Response("thinking_level is not supported for this model", { status: 400 }) : geminiReply({ offers: [] });
+  }));
+  expect(await new GeminiExtractor("old", "g").listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  expect(seen).toEqual([{ thinkingLevel: "low" }, undefined]);
 });
 
 test("provider choice: Gemini first, then Grok", () => {
