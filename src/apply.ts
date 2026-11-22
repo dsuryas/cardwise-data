@@ -108,6 +108,7 @@ export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: str
       title: p.title,
       merchants: [p.merchantId],
       ...(p.cardIds?.length ? { cards: p.cardIds } : { issuers: [p.issuer!] }),
+      ...(p.excludeCardIds?.length && !p.cardIds?.length ? { excludeCards: p.excludeCardIds } : {}),
       ...(p.percent !== undefined ? { percent: p.percent } : {}),
       ...(p.flat !== undefined ? { flat: p.flat } : {}),
       ...(p.maxBenefit !== undefined ? { maxBenefit: p.maxBenefit } : {}),
@@ -121,8 +122,9 @@ export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: str
       checkedOn: today,
     };
     // Same deal under a different title (the extractor and recall pass word things differently) is one offer.
-    const sameDeal = (x: Offer) => x.merchants[0] === offer.merchants[0] && x.percent === offer.percent && x.flat === offer.flat &&
-      x.maxBenefit === offer.maxBenefit && JSON.stringify(x.issuers ?? x.cards) === JSON.stringify(offer.issuers ?? offer.cards) && !x.title.startsWith("Sample:");
+    // A version that knows the cap also replaces one that didn't (e.g. a listing page vs the offer's own terms page).
+    const sameDeal = (x: Offer) => sameDealKey(x) === sameDealKey(offer) &&
+      (x.maxBenefit === offer.maxBenefit || (x.maxBenefit === undefined && offer.maxBenefit !== undefined)) && !x.title.startsWith("Sample:");
     let idx = c.offers.findIndex((x) => x.id === offer.id);
     if (idx < 0) {
       idx = c.offers.findIndex(sameDeal);
@@ -136,6 +138,11 @@ export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: str
     }
   }
   return changes;
+}
+
+/** Merchant, who it's for, and the headline numbers: two offers sharing these are the same deal. */
+export function sameDealKey(o: Offer): string {
+  return [o.merchants[0], JSON.stringify(o.issuers ?? o.cards ?? []), o.percent ?? "", o.flat ?? ""].join("|");
 }
 
 /** An offer whose page was re-read today but no longer carries its wording has been withdrawn. */
@@ -153,6 +160,26 @@ export function dropVanishedOffers(c: Catalog, sourceUrl: string, pageText: stri
 /** Drop expired offers, and the placeholder "Sample:" offers once real ones are flowing. */
 export function cleanOffers(c: Catalog, today: string, dropSamples: boolean): Change[] {
   const changes: Change[] = [];
+  // Collapse duplicates already in the catalog: keep the one with the most terms (cap, then minimum), newest last.
+  const best = new Map<string, Offer>();
+  for (const o of c.offers) {
+    const k = sameDealKey(o) + "|" + (o.maxBenefit ?? "");
+    const prev = best.get(k);
+    if (!prev) { best.set(k, o); continue; }
+    const score = (x: Offer) => (x.minTxn !== undefined ? 1 : 0) + (x.excludeCards?.length ? 1 : 0);
+    const keep = score(o) >= score(prev) ? o : prev;
+    changes.push({ level: "SAFE", what: `duplicate offer merged: ${(keep === o ? prev : o).title} → ${keep.title}` });
+    best.set(k, keep);
+  }
+  // A capless offer is superseded by the same deal with a known cap.
+  const capped = new Set([...best.values()].filter((o) => o.maxBenefit !== undefined).map(sameDealKey));
+  c.offers = [...best.values()].filter((o) => {
+    if (o.maxBenefit === undefined && capped.has(sameDealKey(o))) {
+      changes.push({ level: "SAFE", what: `capless offer replaced by its capped version: ${o.title}` });
+      return false;
+    }
+    return true;
+  });
   c.offers = c.offers.filter((o) => {
     if (o.validTo < today) {
       changes.push({ level: "SAFE", what: `expired offer removed: ${o.title}` });

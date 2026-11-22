@@ -57,6 +57,7 @@ export const Offer = z.object({
   cards: z.array(id).optional(),
   issuers: z.array(z.string()).optional(),
   networks: z.array(network).optional(),
+  excludeCards: z.array(id).optional(),
   type: z.enum(["INSTANT_DISCOUNT", "CASHBACK"]).optional(),
   percent: z.number().min(0).max(100).optional(),
   flat: z.number().min(0).optional(),

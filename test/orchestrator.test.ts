@@ -153,3 +153,41 @@ it("cleans out live 'up to' offers that have no cap", async () => {
   expect(c.offers.some((o) => o.id === "x")).toBe(false);
   expect(ch.some((x) => /no cap/.test(x.what))).toBe(true);
 });
+
+describe("more sources", () => {
+  it("picks the newest sitemap offer pages for merchants we track", async () => {
+    const { pickFromSitemap } = await import("../src/run.ts");
+    const urls = [
+      { loc: "https://bank.example/offers/myntra-fashion-sale", lastmod: "2026-11-20" },
+      { loc: "https://bank.example/offers/tax-buddy-discount", lastmod: "2026-11-21" },
+      { loc: "https://bank.example/offers/swiggy-weekend", lastmod: "2026-11-01" },
+      { loc: "https://bank.example/offers/get-12-percent-discount-on-booking-flights-at-ixigo", lastmod: "2026-11-22" },
+      { loc: "https://bank.example/personal/myntra-card", lastmod: "2026-11-22" },
+    ];
+    expect(pickFromSitemap(load(), urls, "/offers/", 2)).toEqual([
+      "https://bank.example/offers/get-12-percent-discount-on-booking-flights-at-ixigo",
+      "https://bank.example/offers/myntra-fashion-sale",
+    ]);
+  });
+
+  it("replaces a capless offer with its capped version and merges duplicates", async () => {
+    const { cleanOffers } = await import("../src/apply.ts");
+    const c = load();
+    c.offers = [
+      { id: "a", title: "Tata CLiQ 10%", merchants: ["tata_cliq"], issuers: ["ICICI"], percent: 10, validFrom: TODAY, validTo: "2026-12-31" },
+      { id: "b", title: "10% off at Tata CLiQ up to Rs 1,500", merchants: ["tata_cliq"], issuers: ["ICICI"], percent: 10, maxBenefit: 1500, validFrom: TODAY, validTo: "2026-12-31" },
+      { id: "c", title: "Same, reworded", merchants: ["tata_cliq"], issuers: ["ICICI"], percent: 10, maxBenefit: 1500, minTxn: 3000, validFrom: TODAY, validTo: "2026-12-31" },
+    ] as never;
+    cleanOffers(c, TODAY, false);
+    expect(c.offers.map((o) => o.id)).toEqual(["c"]);
+  });
+
+  it("writes card exclusions into the catalog", async () => {
+    const { mergeOffers } = await import("../src/apply.ts");
+    const c = load();
+    const page = "Get 12% discount up to Rs 1,500 on ixigo flights. Not valid on Amazon Pay ICICI Bank Credit Card. Valid till 31st Dec 2026.";
+    mergeOffers(c, [{ title: "ixigo", merchantId: "ixigo", issuer: "ICICI", excludeCardIds: ["amazon_pay_icici"], percent: 12, maxBenefit: 1500, validFrom: TODAY, validTo: "2026-12-31",
+      quote: "Get 12% discount up to Rs 1,500 on ixigo flights", dateQuote: "Valid till 31st Dec 2026" }], page, "https://bank.example/ixigo", TODAY);
+    expect(c.offers.find((o) => o.merchants[0] === "ixigo" && o.percent === 12)?.excludeCards).toEqual(["amazon_pay_icici"]);
+  });
+});

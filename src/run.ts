@@ -7,7 +7,7 @@ import { applyCardCheck, cleanOffers, dropVanishedOffers, mergeOffers, report, t
 import { acceptCheck, extractorFromEnv, needsTerms, type Extractor, type ProposedOffer } from "./extract.ts";
 
 const offerKey = (o: ProposedOffer) => `${o.merchantId}|${o.percent ?? ""}|${o.flat ?? ""}|${o.maxBenefit ?? ""}`;
-import { fetchPage, httpFetcher, type Fetcher, type PageText } from "./fetch.ts";
+import { fetchPage, httpFetcher, sitemapUrls, type Fetcher, type PageText } from "./fetch.ts";
 import { nextVersion, validateCatalog, type Catalog } from "./schema.ts";
 
 export interface Source {
@@ -18,6 +18,13 @@ export interface Source {
   fallbackUrls?: string[];
   /** Offer listing pages: open up to `max` single-offer pages whose URL contains `pattern` (picked by the link scout). */
   followLinks?: { max: number; pattern?: string };
+  /** Page draws its offers with scripts: render it in the browser straight away. */
+  render?: boolean;
+  /**
+   * Discover offer pages from the bank's sitemap instead of a listing page: URLs containing `include`
+   * and naming a merchant we track, most recently modified first, at most `max` a day.
+   */
+  sitemap?: { include: string; max: number };
   cardId?: string;
   issuer?: string;
   merchantId?: string;
@@ -59,7 +66,7 @@ async function fetchFirstWorking(s: Source, fetcher: Fetcher, robots: Map<string
   for (const url of [s.url, ...(s.fallbackUrls ?? [])]) {
     try {
       log(`${s.id}: fetching ${url}`);
-      const page = await fetchPage(url, fetcher, robots);
+      const page = await fetchPage(url, fetcher, robots, { render: s.render });
       if (page.text.length < 200) throw new Error(`only ${page.text.length} chars of text`);
       return page;
     } catch (e) {
@@ -79,6 +86,18 @@ function healthTable(sources: Source[], health: Record<string, SourceHealth>): s
     return `| ${s.id} | ❌ | ${(h.error ?? "").slice(0, 160).replace(/\|/g, "/")} | ${since} |`;
   });
   return ["## Sources", "", "| source | ok | detail | note |", "|---|---|---|---|", ...rows, ""].join("\n");
+}
+
+/** Newest sitemap URLs under `include` whose slug names a merchant we track. */
+export function pickFromSitemap(catalog: Catalog, urls: { loc: string; lastmod?: string }[], include: string, max: number): string[] {
+  const tokens = catalog.merchants.flatMap((m) => [m.id.replace(/_/g, "-"), m.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")])
+    .filter((t) => t.length >= 3);
+  return urls
+    .filter((u) => u.loc.includes(include))
+    .filter((u) => { const slug = new URL(u.loc).pathname.toLowerCase(); return tokens.some((t) => slug.includes(t)); })
+    .sort((a, b) => (b.lastmod ?? "").localeCompare(a.lastmod ?? ""))
+    .slice(0, max)
+    .map((u) => u.loc);
 }
 
 /** Links on a listing page that name the merchant of an offer still missing its terms (cap, end date). */
@@ -119,7 +138,7 @@ export async function runPipeline(
     const started = Date.now();
     let timer: ReturnType<typeof setTimeout> | undefined;
     let abandoned = false; // set when the deadline wins; late results must not touch the catalog
-    const budgetMs = sourceTimeoutMs() + (s.followLinks?.max ?? 0) * 90_000;
+    const budgetMs = sourceTimeoutMs() + (s.followLinks?.max ?? 0) * 90_000 + (s.sitemap?.max ?? 0) * 60_000;
     const deadline = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error(`gave up after ${Math.round(budgetMs / 1000)}s`)), budgetMs); });
     // Work is staged here and applied to the catalog only once the whole source has finished.
     const staged: (() => Change[])[] = [];
@@ -171,6 +190,39 @@ export async function runPipeline(
           if (!done) {
             if (lastWeak) staged.push(lastWeak);
             else throw new Error(errors.join(" | ") || "no source worked");
+          }
+          return;
+        }
+
+        if (s.kind === "offers" && s.sitemap) {
+          const hint = { issuer: s.issuer, merchantId: s.merchantId };
+          const all = await sitemapUrls(s.url, fetcher, robots);
+          const picked = pickFromSitemap(catalog, all, s.sitemap.include, s.sitemap.max);
+          log(`${s.id}: sitemap has ${all.length} URLs; reading the ${picked.length} newest offer pages for merchants we track`);
+          health[s.id] = { ok: true, via: "sitemap", usedUrl: s.url, chars: all.length, seconds: 0, failStreak: 0, lastOk: today, detailPages: 0 };
+          staged.push(() => { offerPagesRead++; return []; });
+          for (const href of picked) {
+            try {
+              const detail = await fetchPage(href, fetcher, robots);
+              health[s.id].detailPages = (health[s.id].detailPages ?? 0) + 1;
+              const key = `${s.id}@${href}`, hash = hashOf(detail.text);
+              if (pageHashes.get(key) === hash) continue;
+              const found = await extractor.listOffers(catalog, detail.text, today, hint);
+              let kept = found;
+              const notes: Change[] = [];
+              if (found.length && extractor.verifyOffers) {
+                const verdicts = new Map((await extractor.verifyOffers(catalog, detail.text, today, found)).map((v) => [v.index, v]));
+                kept = found.filter((o, i) => {
+                  const v = verdicts.get(i);
+                  if (v && !v.ok) { notes.push({ level: "INFO", what: `verifier rejected offer "${o.title}": ${v.reason}`, quote: o.quote, source: href }); return false; }
+                  return true;
+                });
+              }
+              staged.push(() => [...notes, ...mergeOffers(catalog, kept, detail.text, href, today), ...dropVanishedOffers(catalog, href, detail.text)]);
+              stagedHashes.push([key, hash]);
+            } catch (e) {
+              staged.push(() => [{ level: "INFO", what: `offer page skipped: ${(e as Error).message}`, source: href }]);
+            }
           }
           return;
         }

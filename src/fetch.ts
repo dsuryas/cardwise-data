@@ -125,7 +125,7 @@ export function pageContainsQuote(pageText: string, quote: string): boolean {
   return q.length >= 12 && normalizeForQuote(pageText).includes(q);
 }
 
-export async function fetchPage(url: string, fetcher: Fetcher = httpFetcher, robotsCache = new Map<string, string>()): Promise<PageText> {
+export async function fetchPage(url: string, fetcher: Fetcher = httpFetcher, robotsCache = new Map<string, string>(), opts: { render?: boolean } = {}): Promise<PageText> {
   const u = new URL(url);
   if (!robotsCache.has(u.origin)) {
     try {
@@ -137,6 +137,14 @@ export async function fetchPage(url: string, fetcher: Fetcher = httpFetcher, rob
   }
   if (!isAllowedByRobots(robotsCache.get(u.origin) ?? "", u.pathname + u.search)) {
     throw new Error(`robots.txt disallows ${url}`);
+  }
+  // Pages known to draw their content with scripts go straight to the browser.
+  if (opts.render && process.env.USE_BROWSER === "1") {
+    const rendered = await browserFetch(url);
+    if (rendered.status >= 400) throw new Error(`HTTP ${rendered.status} in browser${rendered.status === 403 ? " (blocked)" : ""}`);
+    const text = htmlToText(rendered.body);
+    if (looksBlocked(text)) throw new Error("bot-check page returned in browser (blocked)");
+    return { url, text, fetchedAt: new Date().toISOString(), via: "browser", links: extractLinks(rendered.body, url) };
   }
   // Plain request first (fast, honest). Fall back to a real browser only for script-rendered pages.
   const page = await fetcher(url);
@@ -155,6 +163,21 @@ export async function fetchPage(url: string, fetcher: Fetcher = httpFetcher, rob
     return { url, text, fetchedAt: new Date().toISOString(), via: "browser", links: extractLinks(rendered.body, url) };
   }
   return { url, text, fetchedAt: new Date().toISOString(), via: "http", links: extractLinks(page.body, url) };
+}
+
+/** URLs (with last-modified dates) from a sitemap, after the same robots.txt check as pages. */
+export async function sitemapUrls(url: string, fetcher: Fetcher = httpFetcher, robotsCache = new Map<string, string>()): Promise<{ loc: string; lastmod?: string }[]> {
+  const u = new URL(url);
+  if (!robotsCache.has(u.origin)) {
+    try { const r = await fetcher(`${u.origin}/robots.txt`); robotsCache.set(u.origin, r.status === 200 ? r.body : ""); } catch { robotsCache.set(u.origin, ""); }
+  }
+  if (!isAllowedByRobots(robotsCache.get(u.origin) ?? "", u.pathname)) throw new Error(`robots.txt disallows ${url}`);
+  const r = await fetcher(url);
+  if (r.status >= 400) throw new Error(`HTTP ${r.status} for sitemap`);
+  return [...r.body.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => ({
+    loc: (m[1].match(/<loc>\s*([^<\s]+)\s*<\/loc>/) ?? [])[1] ?? "",
+    lastmod: (m[1].match(/<lastmod>\s*([^<\s]+)\s*<\/lastmod>/) ?? [])[1],
+  })).filter((x) => x.loc);
 }
 
 /** Below this much text a page is a shell that needs scripts (or a block page). */

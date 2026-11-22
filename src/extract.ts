@@ -28,6 +28,8 @@ export interface ProposedOffer {
   merchantId: string;
   issuer?: string;
   cardIds?: string[];
+  /** Cards the page says are NOT eligible (e.g. "not valid on Amazon Pay ICICI Bank Credit Card"). */
+  excludeCardIds?: string[];
   percent?: number;
   flat?: number;
   maxBenefit?: number;
@@ -125,6 +127,7 @@ abstract class LlmExtractor implements Extractor {
               merchantId: { type: "string", enum: catalog.merchants.map((m) => m.id) },
               issuer: { type: "string", enum: issuers },
               cardIds: { type: "array", items: { type: "string", enum: catalog.cards.map((c) => c.id) } },
+              excludeCardIds: { type: "array", items: { type: "string", enum: catalog.cards.map((c) => c.id) } },
               percent: { type: "number" }, flat: { type: "number" }, maxBenefit: { type: "number" }, minTxn: { type: "number" },
               validFrom: { type: "string" }, validTo: { type: "string" },
               paymentModes: { type: "array", items: { type: "string", enum: ["FULL", "EMI"] } },
@@ -146,6 +149,8 @@ abstract class LlmExtractor implements Extractor {
       `Use ONLY these merchant ids (skip offers for other merchants): ${catalog.merchants.map((m) => `${m.id}=${m.name}`).join(", ")}.`,
       `Use ONLY these issuer names: ${issuers.join(", ")}. If an offer is limited to specific cards, use these card ids: ${catalog.cards.map((c) => `${c.id}=${c.name}`).join(", ")}.`,
       `Only credit-card offers (skip offers that are debit-card or net-banking only).`,
+      `If the page names cards the offer does NOT apply to (e.g. "not valid on Amazon Pay ICICI Bank Credit Card", "except co-branded cards"), list those card ids in excludeCardIds. If it applies only to named cards, use cardIds instead of issuer.`,
+      `If an offer is EMI-only, set paymentModes to ["EMI"]; if full payment only, ["FULL"]. maxBenefit is the maximum discount/cashback; minTxn the minimum transaction value.`,
       `Today is ${today}. Dates as YYYY-MM-DD. If the page says "N days left", validTo = today + N days. If it gives no end date at all, skip the offer.`,
       `"quote" must be copied character-for-character from the page and contain the offer's numbers. "dateQuote" must be copied character-for-character from the page and state the end date or the days left.`,
     ].filter(Boolean);
@@ -185,7 +190,7 @@ abstract class LlmExtractor implements Extractor {
       `is the end date right (today is ${today}; "N days left" means today + N); if issuer or card ids are given, does the page support them.`,
       `ok=true only if every given field is supported by the page. Give a short reason either way.`,
       ``, `OFFERS:`,
-      offers.map((o, i) => `${i}. ${JSON.stringify({ title: o.title, merchantId: o.merchantId, issuer: o.issuer, cardIds: o.cardIds, percent: o.percent, flat: o.flat, maxBenefit: o.maxBenefit, minTxn: o.minTxn, validFrom: o.validFrom, validTo: o.validTo, paymentModes: o.paymentModes, days: o.days })}`).join("\n"),
+      offers.map((o, i) => `${i}. ${JSON.stringify({ title: o.title, merchantId: o.merchantId, issuer: o.issuer, cardIds: o.cardIds, excludeCardIds: o.excludeCardIds, percent: o.percent, flat: o.flat, maxBenefit: o.maxBenefit, minTxn: o.minTxn, validFrom: o.validFrom, validTo: o.validTo, paymentModes: o.paymentModes, days: o.days })}`).join("\n"),
       ``, `Merchant ids: ${catalog.merchants.map((m) => `${m.id}=${m.name}`).join(", ")}`,
       ``, `PAGE TEXT:`, pageText.slice(0, MAX_PAGE_CHARS),
     ].join("\n");

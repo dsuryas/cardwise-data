@@ -1,5 +1,5 @@
 {
-  "about": "Pages the daily pipeline reads. kind=card: re-check that card's rules. kind=offers: list offers. Each source tries `url`, then each of `fallbackUrls` in order (official terms PDFs and alternate bank pages), and uses the first that isn't blocked. robots.txt is always respected and bot checks are never bypassed. Add a source by appending an entry; set enabled=false to pause one. Check out/report.md's Sources table for which ones work. Offer sources with followLinks also open up to `max` single-offer pages picked by the link scout.",
+  "about": "Pages the daily pipeline reads. kind=card: re-check that card's rules. kind=offers: list offers. Each source tries `url`, then each of `fallbackUrls` in order (official terms PDFs and alternate bank pages), and uses the first that isn't blocked. robots.txt is always respected and bot checks are never bypassed. Add a source by appending an entry; set enabled=false to pause one. Check out/report.md's Sources table for which ones work. Offer sources with followLinks also open up to `max` single-offer pages picked by the link scout. Sources with sitemap discover offer pages from the bank's sitemap; render=true pages are drawn in the browser.",
   "sources": [
     {
       "id": "amazon_pay_icici",
@@ -131,6 +131,17 @@
       }
     },
     {
+      "id": "offers_icici_sitemap",
+      "kind": "offers",
+      "issuer": "ICICI",
+      "url": "https://www.icici.bank.in/generic-sitemap.xml",
+      "sitemap": {
+        "include": "/offers/",
+        "max": 15
+      },
+      "note": "ICICI's listing pages draw offers with scripts; its sitemap lists every offer page, and those pages carry the full terms."
+    },
+    {
       "id": "offers_sbi_card",
       "kind": "offers",
       "issuer": "SBI Card",
@@ -170,6 +181,150 @@
       "followLinks": {
         "max": 3
       }
+    },
+    {
+      "id": "offers_hdfc_amazon",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "amazon",
+      "url": "https://www.hdfc.bank.in/ps/offers/amazon",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_flipkart",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "flipkart",
+      "url": "https://www.hdfc.bank.in/ps/offers/flipkart",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_swiggy",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "swiggy",
+      "url": "https://www.hdfc.bank.in/ps/offers/swiggy",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_zomato",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "zomato",
+      "url": "https://www.hdfc.bank.in/ps/offers/zomato",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_myntra",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "myntra",
+      "url": "https://www.hdfc.bank.in/ps/offers/myntra",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_tata_cliq",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "tata_cliq",
+      "url": "https://www.hdfc.bank.in/ps/offers/tata-cliq",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_croma",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "croma",
+      "url": "https://www.hdfc.bank.in/ps/offers/croma",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_blinkit",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "blinkit",
+      "url": "https://www.hdfc.bank.in/ps/offers/blinkit",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_makemytrip",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "makemytrip",
+      "url": "https://www.hdfc.bank.in/ps/offers/make-my-trip",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_cleartrip",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "cleartrip",
+      "url": "https://www.hdfc.bank.in/ps/offers/cleartrip",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_ixigo",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "ixigo",
+      "url": "https://www.hdfc.bank.in/ps/offers/ixigo",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_zepto",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "zepto",
+      "url": "https://www.hdfc.bank.in/ps/offers/zepto",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_swiggy_instamart",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "swiggy_instamart",
+      "url": "https://www.hdfc.bank.in/ps/offers/swiggy-instamart",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_bigbasket",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "bigbasket",
+      "url": "https://www.hdfc.bank.in/ps/offers/bigbasket",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_reliance_digital",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "reliance_digital",
+      "url": "https://www.hdfc.bank.in/ps/offers/reliance-digital",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_ajio",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "ajio",
+      "url": "https://www.hdfc.bank.in/ps/offers/ajio",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_easemytrip",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "easemytrip",
+      "url": "https://www.hdfc.bank.in/ps/offers/easemytrip",
+      "render": true
+    },
+    {
+      "id": "offers_hdfc_vijay_sales",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "merchantId": "vijay_sales",
+      "url": "https://www.hdfc.bank.in/ps/offers/vijay-sales",
+      "render": true
     }
   ]
 }
