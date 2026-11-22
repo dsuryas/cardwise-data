@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.22-2",
+  "version": "2026.11.22-3",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
@@ -1732,25 +1732,6 @@
       "checkedOn": "2026-11-22"
     },
     {
-      "id": "makemytrip_icici_0124e7b2",
-      "title": "Get Up To 15% Instant Discount",
-      "merchants": [
-        "makemytrip"
-      ],
-      "issuers": [
-        "ICICI"
-      ],
-      "percent": 15,
-      "paymentModes": [
-        "FULL"
-      ],
-      "validFrom": "2026-11-22",
-      "validTo": "2026-11-29",
-      "source": "https://www.icici.bank.in/offers",
-      "quote": "Get Up To 15% Instant Discount",
-      "checkedOn": "2026-11-22"
-    },
-    {
       "id": "tata_cliq_icici_96bdea63",
       "title": "Get 10% Instant Discount",
       "merchants": [
@@ -1786,25 +1767,6 @@
       "validTo": "2026-11-29",
       "source": "https://www.icici.bank.in/offers",
       "quote": "10% Off on Weekend Shopping",
-      "checkedOn": "2026-11-22"
-    },
-    {
-      "id": "easemytrip_icici_39b46263",
-      "title": "Get Up To 20% Off",
-      "merchants": [
-        "easemytrip"
-      ],
-      "issuers": [
-        "ICICI"
-      ],
-      "percent": 20,
-      "paymentModes": [
-        "FULL"
-      ],
-      "validFrom": "2026-11-22",
-      "validTo": "2026-11-29",
-      "source": "https://www.icici.bank.in/offers",
-      "quote": "Get Up To 20% Off",
       "checkedOn": "2026-11-22"
     },
     {
