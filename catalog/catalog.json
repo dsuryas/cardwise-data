@@ -1,24 +1,24 @@
 {
-  "version": "2026.11.18-1",
+  "version": "2026.11.22-1",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
       "id": "cashback",
       "name": "Cashback",
       "kind": "CASHBACK",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "amazon_pay_balance",
       "name": "Amazon Pay balance",
       "kind": "CASHBACK",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "neucoins",
       "name": "NeuCoins",
       "kind": "POINTS",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "hdfc_rp",
@@ -30,7 +30,7 @@
       "id": "hdfc_rp_premium",
       "name": "HDFC Infinia Points",
       "kind": "POINTS",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "sbi_rp",
@@ -790,7 +790,7 @@
           "id": "apicici_base",
           "label": "everywhere else",
           "percent": 1,
-          "source": "https://help.icicibank.com/amazon-pay/"
+          "source": "https://www.icici.bank.in/personal-banking/cards/credit-card/amazon-pay-credit-card"
         }
       ],
       "verified": true,
@@ -860,7 +860,7 @@
         "millennia"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "mil_partner",
@@ -1029,7 +1029,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-18"
+      "checkedOn": "2026-11-22"
     },
     {
       "id": "flipkart_axis",
@@ -1348,7 +1348,7 @@
         "millennia diners"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "mil_partner_d",
@@ -1411,7 +1411,7 @@
         "ornge"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "orn_swiggy",
@@ -1517,7 +1517,7 @@
         "mega saver"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "upi_3",
@@ -1626,7 +1626,7 @@
         "platinum chip"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "rules": [
         {
           "id": "plat_util",
@@ -1667,7 +1667,7 @@
         "sapphiro"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "rules": [
         {
           "id": "sap_intl",
@@ -1702,149 +1702,220 @@
   ],
   "offers": [
     {
-      "id": "amz_icici_fest",
-      "title": "Sample: Festival sale: 10% instant off with ICICI",
-      "merchants": [
-        "amazon"
-      ],
-      "issuers": [
-        "ICICI"
-      ],
-      "percent": 10,
-      "maxBenefit": 1000,
-      "minTxn": 5000,
-      "paymentModes": [
-        "FULL"
-      ],
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31",
-      "event": "sale"
-    },
-    {
-      "id": "fk_axis_sale",
-      "title": "Sample: Sale: 10% instant off with Axis",
-      "merchants": [
-        "flipkart"
-      ],
-      "issuers": [
-        "Axis"
-      ],
-      "percent": 10,
-      "maxBenefit": 1500,
-      "minTxn": 5000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31",
-      "event": "sale"
-    },
-    {
-      "id": "myntra_hdfc",
-      "title": "Sample: 10% instant off with HDFC",
-      "merchants": [
-        "myntra"
-      ],
-      "issuers": [
-        "HDFC"
-      ],
-      "percent": 10,
-      "maxBenefit": 750,
-      "minTxn": 3000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-15"
-    },
-    {
-      "id": "mmt_icici",
-      "title": "Sample: 12% off flights with ICICI",
+      "id": "makemytrip_icici_3359877b",
+      "title": "Get Up To 15% Instant Discount",
       "merchants": [
         "makemytrip"
       ],
       "issuers": [
         "ICICI"
       ],
-      "percent": 12,
-      "maxBenefit": 5000,
-      "minTxn": 10000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
+      "percent": 15,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get Up To 15% Instant Discount",
+      "checkedOn": "2026-11-22"
     },
     {
-      "id": "bms_sbi",
-      "title": "Sample: ₹250 off movie tickets with SBI Card",
+      "id": "tata_cliq_icici_d1d50408",
+      "title": "Get 10% Instant Discount",
       "merchants": [
-        "bookmyshow"
+        "tata_cliq"
       ],
       "issuers": [
-        "SBI Card"
-      ],
-      "flat": 250,
-      "minTxn": 500,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
-    },
-    {
-      "id": "croma_hdfc",
-      "title": "Sample: 10% off electronics with HDFC",
-      "merchants": [
-        "croma"
-      ],
-      "issuers": [
-        "HDFC"
+        "ICICI"
       ],
       "percent": 10,
-      "maxBenefit": 3000,
-      "minTxn": 20000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get 10% Instant Discount",
+      "checkedOn": "2026-11-22"
     },
     {
-      "id": "blinkit_hsbc_weekend",
-      "title": "Sample: Weekend ₹100 off with HSBC",
+      "id": "tata_cliq_icici_61750da7",
+      "title": "10% Off on Weekend Shopping",
       "merchants": [
-        "blinkit"
+        "tata_cliq"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 10,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "10% Off on Weekend Shopping",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "easemytrip_icici_89ab5bce",
+      "title": "Get Up To 20% Off",
+      "merchants": [
+        "easemytrip"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 20,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get Up To 20% Off",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "ixigo_icici_4bad3cce",
+      "title": "Get 12% Discount on Flights",
+      "merchants": [
+        "ixigo"
+      ],
+      "issuers": [
+        "ICICI"
+      ],
+      "percent": 12,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-22",
+      "validTo": "2026-11-29",
+      "source": "https://www.icici.bank.in/offers",
+      "quote": "Get 12% Discount on Flights",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "nykaa_hsbc_b23c7428",
+      "title": "Nykaa",
+      "merchants": [
+        "nykaa"
       ],
       "issuers": [
         "HSBC"
       ],
-      "flat": 100,
-      "minTxn": 799,
+      "percent": 10,
+      "maxBenefit": 1000,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 10% off up to INR 1,000 on Nykaa Beauty and Nykaa Fashion.",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "bookmyshow_hsbc_e500f423",
+      "title": "BookMyShow Lounge",
+      "merchants": [
+        "bookmyshow"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 10,
       "days": [
-        "SATURDAY",
-        "SUNDAY"
+        "SATURDAY"
       ],
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 10% off live events and get buy-one-get-one-free movie tickets on Saturdays with your HSBC credit card.",
+      "checkedOn": "2026-11-22"
     },
     {
-      "id": "swiggy_axis",
-      "title": "Sample: 15% off with Axis cards",
+      "id": "zomato_hsbc_0ec47d66",
+      "title": "District by Zomato",
       "merchants": [
-        "swiggy"
+        "zomato"
       ],
       "issuers": [
-        "Axis"
+        "HSBC"
       ],
-      "percent": 15,
-      "maxBenefit": 125,
-      "minTxn": 400,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
+      "percent": 10,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Save 10% on dining, activities and shopping. Plus, enjoy buy-one-get-one cinema tickets for less and enjoy movies on the big screen for less.",
+      "checkedOn": "2026-11-22"
     },
     {
-      "id": "tanishq_hdfc_emi",
-      "title": "Sample: 5% off gold jewellery on HDFC EMI",
+      "id": "tata_cliq_hsbc_5ec7da23",
+      "title": "Tata CliQ Luxury",
       "merchants": [
-        "tanishq"
+        "tata_cliq"
       ],
       "issuers": [
-        "HDFC"
+        "HSBC"
       ],
-      "percent": 5,
-      "maxBenefit": 5000,
-      "minTxn": 25000,
-      "paymentModes": [
-        "EMI"
+      "percent": 20,
+      "maxBenefit": 15000,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 20% off up to INR 15,000",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "vijay_sales_hsbc_69f9470d",
+      "title": "Vijay Sales",
+      "merchants": [
+        "vijay_sales"
       ],
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 20,
+      "maxBenefit": 10000,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 20% off up to INR 10,000",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "nykaa_hsbc_41f0efd0",
+      "title": "Nykaa Beauty",
+      "merchants": [
+        "nykaa"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 20,
+      "maxBenefit": 2000,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 20% off up to INR 2,000",
+      "checkedOn": "2026-11-22"
+    },
+    {
+      "id": "myntra_hsbc_522ce026",
+      "title": "Myntra",
+      "merchants": [
+        "myntra"
+      ],
+      "issuers": [
+        "HSBC"
+      ],
+      "percent": 20,
+      "maxBenefit": 2500,
+      "minTxn": 10000,
+      "validFrom": "2026-11-22",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/",
+      "quote": "Enjoy 20% off, up to INR2,500, when you spend INR10,000 or more.",
+      "checkedOn": "2026-11-22"
     }
   ],
   "fees": [
