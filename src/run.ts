@@ -46,6 +46,8 @@ export interface RunResult {
   risky: number;
   reportMd: string;
   health: Record<string, SourceHealth>;
+  /** Live catalog plus the RISKY changes, for the review pull request (null when nothing needs review). */
+  reviewCatalog: Catalog | null;
 }
 
 /**
@@ -244,8 +246,20 @@ export async function runPipeline(
   if (changed) catalog.version = nextVersion(catalog.version, today);
   const { problems } = validateCatalog(catalog);
   if (problems.length) throw new Error("Updated catalog is invalid, nothing written:\n" + problems.join("\n"));
-  const risky = changes.filter((c) => c.level === "RISKY").length;
-  return { catalog, changes, changed, risky, reportMd: report(changes, catalog.version) + "\n" + healthTable(sources, health), health };
+  const riskyChanges = changes.filter((c) => c.level === "RISKY");
+  const risky = riskyChanges.length;
+  let reviewCatalog: Catalog | null = null;
+  if (risky) {
+    reviewCatalog = structuredClone(catalog);
+    for (const ch of riskyChanges) ch.applyTo?.(reviewCatalog);
+    reviewCatalog.version = nextVersion(catalog.version, today);
+    const review = validateCatalog(reviewCatalog);
+    if (review.problems.length) {
+      changes.push({ level: "INFO", what: "proposed card-term changes would make the catalog invalid; not opened for review: " + review.problems.join("; ") });
+      reviewCatalog = null;
+    }
+  }
+  return { catalog, changes, changed, risky: reviewCatalog ? risky : 0, reportMd: report(changes, catalog.version) + "\n" + healthTable(sources, health), health, reviewCatalog };
 }
 
 async function main() {
@@ -264,6 +278,7 @@ async function main() {
   mkdirSync("out", { recursive: true });
   if (result.changed) writeFileSync("catalog/catalog.json", JSON.stringify(result.catalog, null, 2) + "\n");
   writeFileSync("out/report.md", result.reportMd);
+  if (result.reviewCatalog) writeFileSync("out/catalog.review.json", JSON.stringify(result.reviewCatalog, null, 2) + "\n");
   writeFileSync("out/summary.json", JSON.stringify({ changed: result.changed, risky: result.risky, version: result.catalog.version }));
   writeFileSync("out/health.json", JSON.stringify(result.health, null, 2));
   console.log(result.reportMd);

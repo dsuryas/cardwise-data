@@ -45,7 +45,7 @@ jobs:
           cat out/report.md >> "$GITHUB_STEP_SUMMARY"
       - name: Publish safe changes directly
         id: push
-        if: steps.s.outputs.changed == 'true' && steps.s.outputs.risky == '0'
+        if: steps.s.outputs.changed == 'true'
         run: |
           git config user.name "cardwise-bot"
           git config user.email "cardwise-bot@users.noreply.github.com"
@@ -53,8 +53,11 @@ jobs:
           git commit -F out/report.md
           git push
           echo "published=true" >> "$GITHUB_OUTPUT"
+      - name: Stage card-term changes for review
+        if: steps.s.outputs.risky != '0'
+        run: cp out/catalog.review.json catalog/catalog.json
       - name: Open a pull request for card-term changes
-        if: steps.s.outputs.changed == 'true' && steps.s.outputs.risky != '0'
+        if: steps.s.outputs.risky != '0'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: data-update-${{ steps.s.outputs.version }}

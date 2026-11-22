@@ -13,6 +13,8 @@ export interface Change {
   what: string;
   quote?: string;
   source?: string;
+  /** RISKY changes don't touch the live catalog; this applies them to the review copy. */
+  applyTo?: (c: Catalog) => void;
 }
 
 export function applyCardCheck(c: Catalog, cardId: string, check: CardCheck, pageText: string, sourceUrl: string, today: string): Change[] {
@@ -36,18 +38,36 @@ export function applyCardCheck(c: Catalog, cardId: string, check: CardCheck, pag
       changes.push({ level: "INFO", what: `${card.name} · ${rule.id} ("${rule.label}") not found on the page; check by hand`, source: sourceUrl });
       continue;
     }
-    // changed → apply on the review branch, flagged RISKY so a human approves it.
-    const before = JSON.stringify({ percent: rule.percent, units: rule.units, perRupees: rule.perRupees, minTxn: rule.minTxn, cap: rule.cap && card.caps?.find((x) => x.id === rule.cap)?.limit });
-    if (chk.percent !== undefined) { rule.percent = chk.percent; delete rule.units; delete rule.perRupees; }
-    if (chk.units !== undefined && chk.perRupees !== undefined) { rule.units = chk.units; rule.perRupees = chk.perRupees; delete rule.percent; }
-    if (chk.minTxn !== undefined) rule.minTxn = chk.minTxn;
-    if (chk.capLimit !== undefined && rule.cap) {
-      const cap = card.caps?.find((x) => x.id === rule.cap);
-      if (cap) cap.limit = chk.capLimit;
+    // changed → never applied to the live catalog; staged for a human on the review branch.
+    const snapshot = (r: typeof rule, capLimit?: number) => JSON.stringify({ percent: r.percent, units: r.units, perRupees: r.perRupees, minTxn: r.minTxn, cap: capLimit });
+    const capOf = (cat: Catalog, r: typeof rule) => (r.cap ? cat.cards.find((x) => x.id === cardId)?.caps?.find((x) => x.id === r.cap)?.limit : undefined);
+    const mutate = (r: typeof rule, cat: Catalog) => {
+      if (chk.percent !== undefined) { r.percent = chk.percent; delete r.units; delete r.perRupees; }
+      if (chk.units !== undefined && chk.perRupees !== undefined) { r.units = chk.units; r.perRupees = chk.perRupees; delete r.percent; }
+      if (chk.minTxn !== undefined) r.minTxn = chk.minTxn;
+      if (chk.capLimit !== undefined && r.cap) {
+        const cap = cat.cards.find((x) => x.id === cardId)?.caps?.find((x) => x.id === r.cap);
+        if (cap) cap.limit = chk.capLimit;
+      }
+      r.source = sourceUrl;
+    };
+    const before = snapshot(rule, capOf(c, rule));
+    const trial = structuredClone(c);
+    const trialRule = trial.cards.find((x) => x.id === cardId)!.rules.find((r) => r.id === rule.id)!;
+    mutate(trialRule, trial);
+    const after = snapshot(trialRule, capOf(trial, trialRule));
+    if (before === after) {
+      // The model said "changed" but the numbers are identical: that's a confirmation.
+      confirmed++;
+      continue;
     }
-    rule.source = sourceUrl;
-    const after = JSON.stringify({ percent: rule.percent, units: rule.units, perRupees: rule.perRupees, minTxn: rule.minTxn, cap: rule.cap && card.caps?.find((x) => x.id === rule.cap)?.limit });
-    changes.push({ level: "RISKY", what: `${card.name} · ${rule.id} ("${rule.label}") changed: ${before} → ${after}`, quote: chk.quote, source: sourceUrl });
+    changes.push({
+      level: "RISKY", what: `${card.name} · ${rule.id} ("${rule.label}") changed: ${before} → ${after}`, quote: chk.quote, source: sourceUrl,
+      applyTo: (cat) => {
+        const r = cat.cards.find((x) => x.id === cardId)?.rules.find((x) => x.id === rule.id);
+        if (r) mutate(r, cat);
+      },
+    });
   }
   for (const b of check.newBenefits) changes.push({ level: "INFO", what: `${card.name}: benefit not modelled yet: ${b.description}`, quote: b.quote, source: sourceUrl });
   if (confirmed > 0 && !changes.some((x) => x.level === "RISKY")) {

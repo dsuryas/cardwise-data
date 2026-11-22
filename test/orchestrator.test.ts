@@ -93,3 +93,22 @@ describe("offer orchestration", () => {
     expect(c.offers.some((o) => o.id === "gone")).toBe(false);
   });
 });
+
+describe("review vs live", () => {
+  it("publishes safe changes and puts card-term changes in a separate review copy", async () => {
+    const c = load();
+    const page = `<p>Amazon Prime members can earn 3% back on purchases carried out on Amazon India</p>${pad}`;
+    const fetcher: Fetcher = async (url) => url.endsWith("/robots.txt")
+      ? { status: 404, body: "", contentType: "text/plain" }
+      : { status: 200, body: html(page), contentType: "text/html" };
+    const ext: Extractor = {
+      checkCard: async () => ({ checks: [{ ruleId: "apicici_amazon", status: "changed", percent: 3, quote: "Amazon Prime members can earn 3% back on purchases carried out on Amazon India" }], newBenefits: [] }),
+      listOffers: async () => [],
+    };
+    const res = await runPipeline(c, [{ id: "amazon_pay_icici", kind: "card", cardId: "amazon_pay_icici", url: "https://icici.example/x" }], ext, TODAY, fetcher);
+    expect(res.risky).toBe(1);
+    expect(res.catalog.cards.find((x) => x.id === "amazon_pay_icici")!.rules[0].percent).toBe(5);
+    expect(res.reviewCatalog!.cards.find((x) => x.id === "amazon_pay_icici")!.rules[0].percent).toBe(3);
+    expect(res.reviewCatalog!.version > res.catalog.version || res.reviewCatalog!.version.endsWith("-1")).toBe(true);
+  });
+});

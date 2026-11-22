@@ -100,7 +100,17 @@ describe("card checks", () => {
     const check: CardCheck = { checks: [{ ruleId: "apicici_amazon", status: "changed", percent: 3, quote: "Amazon Prime members can earn 3% back on purchases carried out on Amazon India" }], newBenefits: [] };
     const ch = applyCardCheck(c, "amazon_pay_icici", check, changedPage, "https://icici.example/faq", TODAY);
     expect(ch[0].level).toBe("RISKY");
-    expect(c.cards.find((x) => x.id === "amazon_pay_icici")!.rules[0].percent).toBe(3);
+    // The live catalog keeps the old rate; the change goes to the review copy only.
+    expect(c.cards.find((x) => x.id === "amazon_pay_icici")!.rules[0].percent).toBe(5);
+    const review = structuredClone(c);
+    ch[0].applyTo!(review);
+    expect(review.cards.find((x) => x.id === "amazon_pay_icici")!.rules[0].percent).toBe(3);
+  });
+  it("treats a 'changed' with identical numbers as a confirmation", () => {
+    const c = load();
+    const check: CardCheck = { checks: [{ ruleId: "apicici_amazon", status: "changed", percent: 5, quote: "Amazon Prime members can earn 5% back on purchases carried out on Amazon India" }], newBenefits: [] };
+    const ch = applyCardCheck(c, "amazon_pay_icici", check, page, "https://icici.example/faq", TODAY);
+    expect(ch.map((x) => x.level)).toEqual(["SAFE"]);
   });
   it("ignores a hallucinated change", () => {
     const c = load();
