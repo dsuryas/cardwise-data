@@ -1,4 +1,4 @@
-// LLM extraction with guardrails (Grok by default, Claude optional). The model never edits the catalog freely:
+// LLM extraction with guardrails (Gemini by default; Grok or Claude optional). The model never edits the catalog freely:
 //  - card pages: it CHECKS each existing rule (same / changed / not found) and must quote the page
 //  - offer pages: it lists offers using only ids we give it, each with a verbatim quote
 // Every quote is then checked against the page text, and every number against its quote.
@@ -135,35 +135,38 @@ abstract class LlmExtractor implements Extractor {
   }
 }
 
-/** xAI Grok via its OpenAI-compatible Chat Completions API. Default for the daily run. */
-export class GrokExtractor extends LlmExtractor {
+/** Any OpenAI-compatible Chat Completions API with function calling (Gemini, Grok). */
+export class OpenAICompatExtractor extends LlmExtractor {
   constructor(
-    private model = process.env.GROK_MODEL || "grok-4-1-fast-reasoning",
-    private apiKey = process.env.XAI_API_KEY,
-    private baseUrl = process.env.XAI_BASE_URL || "https://api.x.ai/v1",
+    private label: string,
+    private model: string,
+    private apiKey: string | undefined,
+    private baseUrl: string,
+    /** "named" forces the one tool by name; "required" forces some tool call (we only offer one). */
+    private forceStyle: "named" | "required" = "named",
   ) {
     super();
-    if (!apiKey) throw new Error("XAI_API_KEY is not set");
+    if (!apiKey) throw new Error(`${label} API key is not set`);
   }
 
   protected async tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
     let lastError: unknown;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 4; attempt++) {
       try {
-        const res = await fetch(`${this.baseUrl}/chat/completions`, {
+        const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/chat/completions`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` },
           body: JSON.stringify({
             model: this.model,
-            max_tokens: 8192,
+            max_tokens: 16384,
             messages: [{ role: "user", content: prompt }],
             tools: [{ type: "function", function: { name, description, parameters: schema } }],
-            tool_choice: { type: "function", function: { name } },
+            tool_choice: this.forceStyle === "named" ? { type: "function", function: { name } } : "required",
           }),
           signal: AbortSignal.timeout(180_000),
         });
-        if (res.status === 429 || res.status >= 500) throw new Error(`xAI API ${res.status}`);
-        if (!res.ok) throw new FatalApiError(`xAI API ${res.status}: ${(await res.text()).slice(0, 300)}`);
+        if (res.status === 429 || res.status >= 500) throw new Error(`${this.label} API ${res.status}`);
+        if (!res.ok) throw new FatalApiError(`${this.label} API ${res.status}: ${(await res.text()).slice(0, 300)}`);
         const body = (await res.json()) as { choices?: { message?: { tool_calls?: { function?: { name?: string; arguments?: string } }[] } }[] };
         const call = body.choices?.[0]?.message?.tool_calls?.find((c) => c.function?.name === name);
         if (!call?.function?.arguments) throw new Error("model returned no structured answer");
@@ -171,16 +174,35 @@ export class GrokExtractor extends LlmExtractor {
       } catch (e) {
         if (e instanceof FatalApiError) throw e;
         lastError = e;
-        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        // free tiers rate-limit per minute: back off generously
+        await new Promise((r) => setTimeout(r, this.retryDelayMs * (attempt + 1)));
       }
     }
     throw lastError;
+  }
+
+  retryDelayMs = 15_000;
+}
+
+/** Google Gemini via AI Studio's free tier (OpenAI-compatible endpoint). Default. */
+export class GeminiExtractor extends OpenAICompatExtractor {
+  constructor(model = process.env.GEMINI_MODEL || "gemini-flash-latest", apiKey = process.env.GEMINI_API_KEY,
+    baseUrl = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai") {
+    super("Gemini", model, apiKey, baseUrl, "required");
+  }
+}
+
+/** xAI Grok (paid API credits). */
+export class GrokExtractor extends OpenAICompatExtractor {
+  constructor(model = process.env.GROK_MODEL || "grok-4-1-fast-reasoning", apiKey = process.env.XAI_API_KEY,
+    baseUrl = process.env.XAI_BASE_URL || "https://api.x.ai/v1") {
+    super("xAI", model, apiKey, baseUrl, "named");
   }
 }
 
 class FatalApiError extends Error {}
 
-/** Anthropic Claude. Used only if XAI_API_KEY is absent and ANTHROPIC_API_KEY is set. */
+/** Anthropic Claude. Used only when no Gemini or xAI key is set. */
 export class ClaudeExtractor extends LlmExtractor {
   private client: Anthropic;
   constructor(private model = process.env.CLAUDE_MODEL ?? "claude-sonnet-5-5", apiKey = process.env.ANTHROPIC_API_KEY) {
@@ -203,11 +225,12 @@ export class ClaudeExtractor extends LlmExtractor {
   }
 }
 
-/** Grok when XAI_API_KEY is set, else Claude when ANTHROPIC_API_KEY is set. */
+/** First configured of: Gemini (free), Grok, Claude. */
 export function extractorFromEnv(): Extractor {
+  if (process.env.GEMINI_API_KEY) return new GeminiExtractor();
   if (process.env.XAI_API_KEY) return new GrokExtractor();
   if (process.env.ANTHROPIC_API_KEY) return new ClaudeExtractor();
-  throw new Error("Set XAI_API_KEY (Grok) or ANTHROPIC_API_KEY (Claude)");
+  throw new Error("Set GEMINI_API_KEY (free, from aistudio.google.com), XAI_API_KEY or ANTHROPIC_API_KEY");
 }
 
 // ---------- Hallucination guards ----------

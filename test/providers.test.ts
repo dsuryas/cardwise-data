@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { GrokExtractor, extractorFromEnv } from "../src/extract.ts";
+import { GeminiExtractor, GrokExtractor, extractorFromEnv } from "../src/extract.ts";
 import type { Catalog } from "../src/schema.ts";
 import { readFileSync } from "node:fs";
 
@@ -29,7 +29,28 @@ test("Grok: a 401 fails fast instead of retrying", async () => {
   expect(fetchMock).toHaveBeenCalledTimes(1);
 });
 
-test("provider choice: Grok wins when its key is set", () => {
-  vi.stubEnv("XAI_API_KEY", "x"); vi.stubEnv("ANTHROPIC_API_KEY", "a");
+test("Gemini: uses the OpenAI-compatible endpoint and tool_choice required", async () => {
+  const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+    expect(JSON.parse(String(init.body)).tool_choice).toBe("required");
+    return new Response(JSON.stringify({ choices: [{ message: { tool_calls: [{ function: { name: "report_offers", arguments: "{\"offers\":[]}" } }] } }] }));
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  expect(await new GeminiExtractor("gemini-test", "g").listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  expect(fetchMock.mock.calls[0][0]).toBe("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions");
+});
+
+test("Gemini: retries a 429 then succeeds", async () => {
+  let n = 0;
+  vi.stubGlobal("fetch", vi.fn(async () => (++n === 1 ? new Response("slow down", { status: 429 })
+    : new Response(JSON.stringify({ choices: [{ message: { tool_calls: [{ function: { name: "report_offers", arguments: "{\"offers\":[]}" } }] } }] })))));
+  const g = new GeminiExtractor("m", "g"); g.retryDelayMs = 1;
+  expect(await g.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  expect(n).toBe(2);
+});
+
+test("provider choice: Gemini first, then Grok", () => {
+  vi.stubEnv("GEMINI_API_KEY", "g"); vi.stubEnv("XAI_API_KEY", "x");
+  expect(extractorFromEnv()).toBeInstanceOf(GeminiExtractor);
+  vi.stubEnv("GEMINI_API_KEY", "");
   expect(extractorFromEnv()).toBeInstanceOf(GrokExtractor);
 });
