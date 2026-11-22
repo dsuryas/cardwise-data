@@ -1,20 +1,126 @@
 {
-  "about": "Pages the daily pipeline reads. kind=card: re-check that card's rules. kind=offers: list offers. robots.txt is always respected; JS-heavy pages need USE_BROWSER=1 (set in the workflow). Add a source by appending an entry; set enabled=false to pause one.",
+  "about": "Pages the daily pipeline reads. kind=card: re-check that card's rules. kind=offers: list offers. Each source tries `url`, then each of `fallbackUrls` in order (official terms PDFs and alternate bank pages), and uses the first that isn't blocked. robots.txt is always respected and bot checks are never bypassed. Add a source by appending an entry; set enabled=false to pause one. Check out/report.md's Sources table for which ones work.",
   "sources": [
-    { "id": "amazon_pay_icici", "kind": "card", "cardId": "amazon_pay_icici", "url": "https://www.icicibank.com/revamp/personal-banking/cards/credit-card/amazon-pay-credit-card/faqs" },
-    { "id": "tata_neu_infinity_hdfc", "kind": "card", "cardId": "tata_neu_infinity_hdfc", "url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card" },
-    { "id": "swiggy_ornge_hdfc", "kind": "card", "cardId": "swiggy_ornge_hdfc", "url": "https://www.hdfc.bank.in/credit-cards/swiggy-ornge-hdfc-bank-credit-card", "note": "Terms PDF (not machine-read yet): https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdfs/Combined_TnCs_Ornge_and_BLCK.pdf" },
-    { "id": "hdfc_millennia", "kind": "card", "cardId": "hdfc_millennia", "url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card" },
-    { "id": "hdfc_millennia_diners", "kind": "card", "cardId": "hdfc_millennia_diners", "url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card" },
-    { "id": "hdfc_upi_rupay", "kind": "card", "cardId": "hdfc_upi_rupay", "url": "https://www.hdfc.bank.in/credit-cards/hdfc-bank-upi-rupay-credit-card" },
-    { "id": "sbi_pulse", "kind": "card", "cardId": "sbi_pulse", "url": "https://www.sbicard.com/en/personal/credit-cards/lifestyle/sbi-card-pulse.page" },
-    { "id": "icici_platinum", "kind": "card", "cardId": "icici_platinum", "url": "https://www.icicibank.com/personal-banking/cards/credit-card/platinum-chip" },
-    { "id": "icici_sapphiro", "kind": "card", "cardId": "icici_sapphiro", "url": "https://www.icicibank.com/personal-banking/cards/credit-card/sapphiro-card/key-privileges" },
-
-    { "id": "offers_icici", "kind": "offers", "issuer": "ICICI", "url": "https://www.icicibank.com/offers" },
-    { "id": "offers_sbi_card", "kind": "offers", "issuer": "SBI Card", "url": "https://www.sbicard.com/en/personal/offers.page" },
-    { "id": "offers_hdfc", "kind": "offers", "issuer": "HDFC", "url": "https://offers.smartbuy.hdfcbank.com/offer_list", "note": "JS-rendered" },
-    { "id": "offers_axis", "kind": "offers", "issuer": "Axis", "url": "https://grabdeals.axisbank.com/", "note": "JS-rendered" },
-    { "id": "offers_hsbc", "kind": "offers", "issuer": "HSBC", "url": "https://www.hsbc.co.in/credit-cards/offers/" }
+    {
+      "id": "amazon_pay_icici",
+      "kind": "card",
+      "cardId": "amazon_pay_icici",
+      "url": "https://www.icici.bank.in/personal-banking/cards/credit-card/amazon-pay-credit-card",
+      "fallbackUrls": [
+        "https://www.icici.bank.in/content/dam/icicibank/india/managed-assets/revamp-page-images/docs/pdf/tc-for-amazon-pay-credit-card.pdf",
+        "https://www.icici.bank.in/terms-condition/tnc-for-amazon-pay",
+        "https://www.icicibank.com/revamp/personal-banking/cards/credit-card/amazon-pay-credit-card/faqs"
+      ]
+    },
+    {
+      "id": "tata_neu_infinity_hdfc",
+      "kind": "card",
+      "cardId": "tata_neu_infinity_hdfc",
+      "url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+      "fallbackUrls": [
+        "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card/value-chart",
+        "https://www.hdfcbank.com/personal/pay/cards/credit-cards/tata-neu-infinity-hdfc-bank-credit-card"
+      ]
+    },
+    {
+      "id": "swiggy_ornge_hdfc",
+      "kind": "card",
+      "cardId": "swiggy_ornge_hdfc",
+      "url": "https://www.hdfc.bank.in/credit-cards/swiggy-ornge-hdfc-bank-credit-card",
+      "fallbackUrls": [
+        "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdfs/Combined_TnCs_Ornge_and_BLCK.pdf"
+      ]
+    },
+    {
+      "id": "hdfc_millennia",
+      "kind": "card",
+      "cardId": "hdfc_millennia",
+      "url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card",
+      "fallbackUrls": [
+        "https://www.hdfcbank.com/content/api/contentstream-id/723fb80a-2dde-42a3-9793-7ae1be57c87f/5d94cc09-80b7-4073-8c9f-22fad88054f0",
+        "https://v.hdfcbank.com/diners-club/products/diners-millennia.html"
+      ]
+    },
+    {
+      "id": "hdfc_millennia_diners",
+      "kind": "card",
+      "cardId": "hdfc_millennia_diners",
+      "url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card",
+      "fallbackUrls": [
+        "https://v.hdfcbank.com/diners-club/products/diners-millennia.html",
+        "https://www.hdfcbank.com/content/api/contentstream-id/723fb80a-2dde-42a3-9793-7ae1be57c87f/5d94cc09-80b7-4073-8c9f-22fad88054f0"
+      ]
+    },
+    {
+      "id": "hdfc_upi_rupay",
+      "kind": "card",
+      "cardId": "hdfc_upi_rupay",
+      "url": "https://www.hdfc.bank.in/credit-cards/hdfc-bank-upi-rupay-credit-card",
+      "fallbackUrls": [
+        "https://www.hdfcbank.com/personal/pay/cards/credit-cards/hdfc-bank-upi-rupay-credit-card"
+      ]
+    },
+    {
+      "id": "sbi_pulse",
+      "kind": "card",
+      "cardId": "sbi_pulse",
+      "url": "https://www.sbicard.com/en/personal/credit-cards/lifestyle/sbi-card-pulse.page",
+      "fallbackUrls": [
+        "https://www.sbicard.com/sbi-card-en/assets/docs/pdf/Pulse-tnc-booklet-combined.pdf"
+      ]
+    },
+    {
+      "id": "icici_platinum",
+      "kind": "card",
+      "cardId": "icici_platinum",
+      "url": "https://www.icici.bank.in/personal-banking/cards/credit-card/platinum-chip",
+      "fallbackUrls": [
+        "https://www.icicibank.com/personal-banking/cards/credit-card/platinum-chip"
+      ]
+    },
+    {
+      "id": "icici_sapphiro",
+      "kind": "card",
+      "cardId": "icici_sapphiro",
+      "url": "https://www.icici.bank.in/personal-banking/cards/credit-card/sapphiro-card",
+      "fallbackUrls": [
+        "https://www.icicibank.com/personal-banking/cards/credit-card/sapphiro-card/key-privileges"
+      ]
+    },
+    {
+      "id": "offers_icici",
+      "kind": "offers",
+      "issuer": "ICICI",
+      "url": "https://www.icici.bank.in/offers",
+      "fallbackUrls": [
+        "https://www.icicibank.com/offers"
+      ]
+    },
+    {
+      "id": "offers_sbi_card",
+      "kind": "offers",
+      "issuer": "SBI Card",
+      "url": "https://www.sbicard.com/en/personal/offers.page"
+    },
+    {
+      "id": "offers_hdfc",
+      "kind": "offers",
+      "issuer": "HDFC",
+      "url": "https://offers.smartbuy.hdfcbank.com/offer_list",
+      "note": "JS-rendered"
+    },
+    {
+      "id": "offers_axis",
+      "kind": "offers",
+      "issuer": "Axis",
+      "url": "https://grabdeals.axisbank.com/",
+      "note": "JS-rendered"
+    },
+    {
+      "id": "offers_hsbc",
+      "kind": "offers",
+      "issuer": "HSBC",
+      "url": "https://www.hsbc.co.in/credit-cards/offers/"
+    }
   ]
 }

@@ -5,16 +5,38 @@ export interface PageText {
   url: string;
   text: string;
   fetchedAt: string;
+  /** How we got it: plain HTTP, headless browser, or a PDF. */
+  via: "http" | "browser" | "pdf";
 }
 
-export type Fetcher = (url: string) => Promise<{ status: number; body: string; contentType: string }>;
+export interface Fetched { status: number; body: string; contentType: string; bytes?: Uint8Array }
+export type Fetcher = (url: string) => Promise<Fetched>;
+
+const MAX_DOWNLOAD = 15 * 1024 * 1024;
 
 export const httpFetcher: Fetcher = async (url) => {
   const res = await fetch(url, { headers: { "user-agent": USER_AGENT, accept: "text/html,application/pdf;q=0.9,*/*;q=0.5" }, redirect: "follow", signal: AbortSignal.timeout(30_000) });
   const contentType = res.headers.get("content-type") ?? "";
-  const body = contentType.includes("pdf") ? "" : await res.text();
-  return { status: res.status, body, contentType };
+  if (isPdf(url, contentType)) {
+    const buf = new Uint8Array(await res.arrayBuffer());
+    if (buf.byteLength > MAX_DOWNLOAD) throw new Error(`PDF too large (${buf.byteLength} bytes)`);
+    return { status: res.status, body: "", contentType, bytes: buf };
+  }
+  return { status: res.status, body: await res.text(), contentType };
 };
+
+function isPdf(url: string, contentType: string): boolean {
+  return contentType.includes("pdf") || /\.pdf($|\?)/i.test(url);
+}
+
+/** Text from a PDF (bank MITC / terms documents). Lines kept so table rows stay together. */
+export async function pdfToText(bytes: Uint8Array): Promise<string> {
+  if (!(bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46)) throw new Error("not a PDF (likely a block page)");
+  const { extractText, getDocumentProxy } = await import("unpdf");
+  const pdf = await getDocumentProxy(bytes);
+  const { text } = await extractText(pdf, { mergePages: false });
+  return (Array.isArray(text) ? text.join("\n") : text).replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
+}
 
 /** Minimal robots.txt check for our user agent / "*" group. Missing robots.txt = allowed. */
 export function isAllowedByRobots(robotsTxt: string, path: string, agent = "CardWiseDataBot"): boolean {
@@ -97,10 +119,31 @@ export async function fetchPage(url: string, fetcher: Fetcher = httpFetcher, rob
   if (!isAllowedByRobots(robotsCache.get(u.origin) ?? "", u.pathname + u.search)) {
     throw new Error(`robots.txt disallows ${url}`);
   }
-  const page = process.env.USE_BROWSER === "1" ? await browserFetch(url) : await fetcher(url);
-  if (page.status >= 400) throw new Error(`HTTP ${page.status} for ${url}`);
-  if (page.contentType.includes("pdf")) throw new Error(`PDF sources need the browser-less PDF step (not supported yet): ${url}`);
-  return { url, text: htmlToText(page.body), fetchedAt: new Date().toISOString() };
+  // Plain request first (fast, honest). Fall back to a real browser only for script-rendered pages.
+  const page = await fetcher(url);
+  if (page.status >= 400) throw new Error(`HTTP ${page.status}${page.status === 403 ? " (blocked)" : ""}`);
+  if (isPdf(url, page.contentType)) {
+    if (!page.bytes) throw new Error("PDF had no content");
+    return { url, text: await pdfToText(page.bytes), fetchedAt: new Date().toISOString(), via: "pdf" };
+  }
+  let text = htmlToText(page.body);
+  if (looksBlocked(text)) throw new Error("bot-check page returned (blocked)");
+  if (text.length < MIN_TEXT && process.env.USE_BROWSER === "1") {
+    const rendered = await browserFetch(url);
+    if (rendered.status >= 400) throw new Error(`HTTP ${rendered.status} in browser${rendered.status === 403 ? " (blocked)" : ""}`);
+    text = htmlToText(rendered.body);
+    if (looksBlocked(text)) throw new Error("bot-check page returned in browser (blocked)");
+    return { url, text, fetchedAt: new Date().toISOString(), via: "browser" };
+  }
+  return { url, text, fetchedAt: new Date().toISOString(), via: "http" };
+}
+
+/** Below this much text a page is a shell that needs scripts (or a block page). */
+export const MIN_TEXT = 400;
+
+/** Common bot-protection interstitials. We stop; we never try to get past them. */
+export function looksBlocked(text: string): boolean {
+  return text.length < 3000 && /access denied|request blocked|attention required|are you a robot|verify you are human|captcha|reference #\s*\d+\.[0-9a-f]+|incapsula incident|pardon our interruption/i.test(text);
 }
 
 /** JS-heavy pages (bank offer portals) render in headless Chromium when USE_BROWSER=1. */

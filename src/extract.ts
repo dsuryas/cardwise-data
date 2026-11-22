@@ -144,6 +144,8 @@ export class OpenAICompatExtractor extends LlmExtractor {
     private baseUrl: string,
     /** "named" forces the one tool by name; "required" forces some tool call (we only offer one). */
     private forceStyle: "named" | "required" = "named",
+    /** Provider-specific request fields, e.g. Gemini's reasoning_effort. */
+    private extraBody: Record<string, unknown> = {},
   ) {
     super();
     if (!apiKey) throw new Error(`${label} API key is not set`);
@@ -152,20 +154,23 @@ export class OpenAICompatExtractor extends LlmExtractor {
   protected async tool<T>(name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
     let lastError: unknown;
     for (let attempt = 0; attempt < 3; attempt++) {
+      const t0 = Date.now();
       try {
         const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/chat/completions`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` },
           body: JSON.stringify({
             model: this.model,
-            max_tokens: 16384,
+            max_tokens: 8192,
             messages: [{ role: "user", content: prompt }],
             tools: [{ type: "function", function: { name, description, parameters: schema } }],
             tool_choice: this.forceStyle === "named" ? { type: "function", function: { name } } : "required",
+            ...this.extraBody,
           }),
-          signal: AbortSignal.timeout(120_000),
+          signal: AbortSignal.timeout(90_000),
         });
-        if (res.status === 429 || res.status >= 500) throw new Error(`${this.label} API ${res.status}`);
+        if (!process.env.VITEST) console.log(`    ${this.label} ${this.model} attempt ${attempt + 1}: HTTP ${res.status} in ${Math.round((Date.now() - t0) / 1000)}s`);
+        if (res.status === 429 || res.status >= 500) throw new Error(`${this.label} API ${res.status}: ${(await res.text()).slice(0, 200)}`);
         if (!res.ok) throw new FatalApiError(`${this.label} API ${res.status}: ${(await res.text()).slice(0, 300)}`);
         const body = (await res.json()) as { choices?: { message?: { tool_calls?: { function?: { name?: string; arguments?: string } }[] } }[] };
         const call = body.choices?.[0]?.message?.tool_calls?.find((c) => c.function?.name === name);
@@ -173,6 +178,7 @@ export class OpenAICompatExtractor extends LlmExtractor {
         return JSON.parse(call.function.arguments) as T;
       } catch (e) {
         if (e instanceof FatalApiError) throw e;
+        if (!process.env.VITEST) console.log(`    ${this.label} attempt ${attempt + 1} failed after ${Math.round((Date.now() - t0) / 1000)}s: ${(e as Error).message}`);
         lastError = e;
         // free tiers rate-limit per minute: back off generously
         await new Promise((r) => setTimeout(r, this.retryDelayMs * (attempt + 1)));
@@ -188,7 +194,8 @@ export class OpenAICompatExtractor extends LlmExtractor {
 export class GeminiExtractor extends OpenAICompatExtractor {
   constructor(model = process.env.GEMINI_MODEL || "gemini-flash-latest", apiKey = process.env.GEMINI_API_KEY,
     baseUrl = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai") {
-    super("Gemini", model, apiKey, baseUrl, "required");
+    // Low thinking keeps extraction fast; it's copying numbers and quotes, not solving puzzles.
+    super("Gemini", model, apiKey, baseUrl, "required", { reasoning_effort: process.env.GEMINI_REASONING ?? "low" });
   }
 }
 

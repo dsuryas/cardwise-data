@@ -176,3 +176,51 @@ it("a hanging source is abandoned after the deadline and the run continues", asy
     delete process.env.SOURCE_TIMEOUT_MS;
   }
 });
+
+describe("sources that allow it", () => {
+  const html = (t: string) => `<html><body><p>${t}</p></body></html>`;
+
+  it("falls back to the next URL when the first is blocked, and records it", async () => {
+    const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+    const fetcher: Fetcher = async (url) => {
+      if (url.endsWith("/robots.txt")) return { status: 404, body: "", contentType: "text/plain" };
+      if (url.includes("blocked")) return { status: 403, body: "Access Denied", contentType: "text/html" };
+      return { status: 200, body: html("Card terms ".repeat(60)), contentType: "text/html" };
+    };
+    const sources = [{ id: "s1", kind: "offers", issuer: "HDFC Bank", url: "https://bank.example/blocked", fallbackUrls: ["https://bank.example/terms"] }] as Source[];
+    const res = await runPipeline(catalog, sources, { checkCard: async () => ({ checks: [], newBenefits: [] }), listOffers: async () => [] }, "2026-11-22", fetcher);
+    expect(res.health.s1.ok).toBe(true);
+    expect(res.health.s1.usedUrl).toBe("https://bank.example/terms");
+    expect(res.reportMd).toMatch(/used fallback/);
+  });
+
+  it("counts consecutive failures across runs", async () => {
+    const catalog = JSON.parse(readFileSync("catalog/catalog.json", "utf8")) as Catalog;
+    const fetcher: Fetcher = async (url) => url.endsWith("/robots.txt")
+      ? { status: 404, body: "", contentType: "text/plain" }
+      : { status: 200, body: html("Access Denied. Reference #18.2f3c1702.1732250000.5b1a"), contentType: "text/html" };
+    const sources = [{ id: "s1", kind: "offers", issuer: "HDFC Bank", url: "https://bank.example/x" }] as Source[];
+    const ext = { checkCard: async () => ({ checks: [], newBenefits: [] }), listOffers: async () => [] };
+    const res = await runPipeline(catalog, sources, ext, "2026-11-22", fetcher, new Map(), { s1: { ok: false, seconds: 1, failStreak: 2, lastOk: "2026-11-19" } });
+    expect(res.health.s1).toMatchObject({ ok: false, failStreak: 3, lastOk: "2026-11-19" });
+    expect(res.health.s1.error).toMatch(/blocked/);
+    expect(res.reportMd).toMatch(/failing 3 runs, last OK 2026-11-19/);
+  });
+
+  it("reads a PDF and rejects a block page served as .pdf", async () => {
+    const { pdfToText } = await import("../src/fetch.ts");
+    // Minimal valid PDF with one line of text.
+    const pdf = `%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 100]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
+4 0 obj<</Length 58>>stream
+BT /F1 12 Tf 10 50 Td (5% cashback on Swiggy, capped Rs 1500) Tj ET
+endstream endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
+trailer<</Root 1 0 R>>
+%%EOF`;
+    expect(await pdfToText(new TextEncoder().encode(pdf))).toContain("5% cashback on Swiggy");
+    await expect(pdfToText(new TextEncoder().encode("<html>Access Denied</html>"))).rejects.toThrow(/not a PDF/);
+  });
+});
