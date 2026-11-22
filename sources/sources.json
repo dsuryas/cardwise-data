@@ -88,6 +88,72 @@
       ]
     },
     {
+      "id": "sbi_cashback",
+      "kind": "card",
+      "cardId": "sbi_cashback",
+      "url": "https://www.sbicard.com/en/faq/cashback-sbi-card-faq.page",
+      "fallbackUrls": [
+        "https://www.sbicard.com/en/personal/sbi-credit-card.page"
+      ]
+    },
+    {
+      "id": "sbi_simplyclick",
+      "kind": "card",
+      "cardId": "sbi_simplyclick",
+      "url": "https://www.sbicard.com/en/personal/credit-cards/shopping/simplyclick-sbi-card.page",
+      "fallbackUrls": [
+        "https://www.sbicard.com/en/personal/sbi-credit-card.page"
+      ]
+    },
+    {
+      "id": "axis_ace",
+      "kind": "card",
+      "cardId": "axis_ace",
+      "url": "https://www.axis.bank.in/cards/credit-card/axis-bank-ace-credit-card",
+      "fallbackUrls": [
+        "https://www.axis.bank.in/docs/default-source/default-document-library/credit-card/axis-bank-ace-credit-card-tncs.pdf"
+      ],
+      "render": true
+    },
+    {
+      "id": "flipkart_axis",
+      "kind": "card",
+      "cardId": "flipkart_axis",
+      "url": "https://www.axis.bank.in/cards/credit-card/flipkart-axisbank-credit-card",
+      "fallbackUrls": [
+        "https://www.axis.bank.in/docs/default-source/default-document-library/cashback-tncs---final.pdf",
+        "https://www.flipkart.com/pages/cbc-cashback-product-tnc"
+      ],
+      "render": true
+    },
+    {
+      "id": "hsbc_live_plus",
+      "kind": "card",
+      "cardId": "hsbc_live_plus",
+      "url": "https://www.hsbc.co.in/credit-cards/products/live-plus/"
+    },
+    {
+      "id": "hdfc_regalia_gold",
+      "kind": "card",
+      "cardId": "hdfc_regalia_gold",
+      "url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card"
+    },
+    {
+      "id": "hdfc_infinia",
+      "kind": "card",
+      "cardId": "hdfc_infinia",
+      "url": "https://www.hdfc.bank.in/credit-cards/infinia-credit-card"
+    },
+    {
+      "id": "amex_mrcc",
+      "kind": "card",
+      "cardId": "amex_mrcc",
+      "url": "https://www.americanexpress.com/in/credit-cards/membership-rewards-card/",
+      "fallbackUrls": [
+        "https://www.americanexpress.com/in/customer-service/faq.how-are-the-points-i-earn-calculated.html"
+      ]
+    },
+    {
       "id": "offers_icici",
       "kind": "offers",
       "issuer": "ICICI",
