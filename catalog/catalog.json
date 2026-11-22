@@ -1,24 +1,24 @@
 {
-  "version": "2026.11.18-1",
+  "version": "2026.11.22-1",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
       "id": "cashback",
       "name": "Cashback",
       "kind": "CASHBACK",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "amazon_pay_balance",
       "name": "Amazon Pay balance",
       "kind": "CASHBACK",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "neucoins",
       "name": "NeuCoins",
       "kind": "POINTS",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "hdfc_rp",
@@ -30,7 +30,7 @@
       "id": "hdfc_rp_premium",
       "name": "HDFC Infinia Points",
       "kind": "POINTS",
-      "rupeesPerUnit": 1.0
+      "rupeesPerUnit": 1
     },
     {
       "id": "sbi_rp",
@@ -794,7 +794,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-18"
+      "checkedOn": "2026-11-22"
     },
     {
       "id": "sbi_cashback",
@@ -860,7 +860,7 @@
         "millennia"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "mil_partner",
@@ -1029,7 +1029,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-18"
+      "checkedOn": "2026-11-22"
     },
     {
       "id": "flipkart_axis",
@@ -1348,7 +1348,7 @@
         "millennia diners"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "mil_partner_d",
@@ -1411,7 +1411,7 @@
         "ornge"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "orn_swiggy",
@@ -1517,7 +1517,7 @@
         "mega saver"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "caps": [
         {
           "id": "upi_3",
@@ -1626,7 +1626,7 @@
         "platinum chip"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "rules": [
         {
           "id": "plat_util",
@@ -1667,7 +1667,7 @@
         "sapphiro"
       ],
       "verified": true,
-      "checkedOn": "2026-11-18",
+      "checkedOn": "2026-11-22",
       "rules": [
         {
           "id": "sap_intl",
@@ -1702,149 +1702,34 @@
   ],
   "offers": [
     {
-      "id": "amz_icici_fest",
-      "title": "Sample: Festival sale: 10% instant off with ICICI",
-      "merchants": [
-        "amazon"
-      ],
-      "issuers": [
-        "ICICI"
-      ],
-      "percent": 10,
-      "maxBenefit": 1000,
-      "minTxn": 5000,
-      "paymentModes": [
-        "FULL"
-      ],
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31",
-      "event": "sale"
-    },
-    {
-      "id": "fk_axis_sale",
-      "title": "Sample: Sale: 10% instant off with Axis",
-      "merchants": [
-        "flipkart"
-      ],
-      "issuers": [
-        "Axis"
-      ],
-      "percent": 10,
-      "maxBenefit": 1500,
-      "minTxn": 5000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31",
-      "event": "sale"
-    },
-    {
-      "id": "myntra_hdfc",
-      "title": "Sample: 10% instant off with HDFC",
-      "merchants": [
-        "myntra"
-      ],
-      "issuers": [
-        "HDFC"
-      ],
-      "percent": 10,
-      "maxBenefit": 750,
-      "minTxn": 3000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-15"
-    },
-    {
-      "id": "mmt_icici",
-      "title": "Sample: 12% off flights with ICICI",
-      "merchants": [
-        "makemytrip"
-      ],
-      "issuers": [
-        "ICICI"
-      ],
-      "percent": 12,
-      "maxBenefit": 5000,
-      "minTxn": 10000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
-    },
-    {
-      "id": "bms_sbi",
-      "title": "Sample: ₹250 off movie tickets with SBI Card",
+      "id": "bookmyshow_hsbc_31442009",
+      "title": "10% off on live events, up to ₹1000/month on all HSBC Credit Cards on all day of the week",
       "merchants": [
         "bookmyshow"
       ],
       "issuers": [
-        "SBI Card"
-      ],
-      "flat": 250,
-      "minTxn": 500,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
-    },
-    {
-      "id": "croma_hdfc",
-      "title": "Sample: 10% off electronics with HDFC",
-      "merchants": [
-        "croma"
-      ],
-      "issuers": [
-        "HDFC"
-      ],
-      "percent": 10,
-      "maxBenefit": 3000,
-      "minTxn": 20000,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
-    },
-    {
-      "id": "blinkit_hsbc_weekend",
-      "title": "Sample: Weekend ₹100 off with HSBC",
-      "merchants": [
-        "blinkit"
-      ],
-      "issuers": [
         "HSBC"
       ],
-      "flat": 100,
-      "minTxn": 799,
+      "percent": 10,
+      "maxBenefit": 1000,
+      "paymentModes": [
+        "FULL",
+        "EMI"
+      ],
       "days": [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
         "SATURDAY",
         "SUNDAY"
       ],
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
-    },
-    {
-      "id": "swiggy_axis",
-      "title": "Sample: 15% off with Axis cards",
-      "merchants": [
-        "swiggy"
-      ],
-      "issuers": [
-        "Axis"
-      ],
-      "percent": 15,
-      "maxBenefit": 125,
-      "minTxn": 400,
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
-    },
-    {
-      "id": "tanishq_hdfc_emi",
-      "title": "Sample: 5% off gold jewellery on HDFC EMI",
-      "merchants": [
-        "tanishq"
-      ],
-      "issuers": [
-        "HDFC"
-      ],
-      "percent": 5,
-      "maxBenefit": 5000,
-      "minTxn": 25000,
-      "paymentModes": [
-        "EMI"
-      ],
-      "validFrom": "2026-11-01",
-      "validTo": "2026-12-31"
+      "validFrom": "2026-07-01",
+      "validTo": "2026-12-31",
+      "source": "https://www.hsbc.co.in/credit-cards/offers/bookmyshow-saturday/",
+      "quote": "10% off up to ₹1000 on booking live event tickets i.e. live music shows, concerts, plays, sports, activities, and workshops.",
+      "checkedOn": "2026-11-22"
     }
   ],
   "fees": [
