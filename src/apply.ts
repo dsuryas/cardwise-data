@@ -120,7 +120,14 @@ export function mergeOffers(c: Catalog, proposed: ProposedOffer[], pageText: str
       quote: p.quote,
       checkedOn: today,
     };
-    const idx = c.offers.findIndex((x) => x.id === offer.id);
+    // Same deal under a different title (the extractor and recall pass word things differently) is one offer.
+    const sameDeal = (x: Offer) => x.merchants[0] === offer.merchants[0] && x.percent === offer.percent && x.flat === offer.flat &&
+      x.maxBenefit === offer.maxBenefit && JSON.stringify(x.issuers ?? x.cards) === JSON.stringify(offer.issuers ?? offer.cards) && !x.title.startsWith("Sample:");
+    let idx = c.offers.findIndex((x) => x.id === offer.id);
+    if (idx < 0) {
+      idx = c.offers.findIndex(sameDeal);
+      if (idx >= 0) offer.id = c.offers[idx].id;
+    }
     if (idx >= 0) {
       c.offers[idx] = offer;
     } else {
@@ -149,6 +156,10 @@ export function cleanOffers(c: Catalog, today: string, dropSamples: boolean): Ch
   c.offers = c.offers.filter((o) => {
     if (o.validTo < today) {
       changes.push({ level: "SAFE", what: `expired offer removed: ${o.title}` });
+      return false;
+    }
+    if (o.percent !== undefined && o.maxBenefit === undefined && /up\s*to\s*\d+(?:\.\d+)?\s*%/i.test(`${o.title} ${o.quote ?? ""}`)) {
+      changes.push({ level: "SAFE", what: `removed "up to" offer with no cap: ${o.title}` });
       return false;
     }
     if (dropSamples && o.title.startsWith("Sample:")) {

@@ -451,6 +451,12 @@ export function checkOfferDate(pageText: string, o: ProposedOffer, today: string
   return { backed: false, validTo: o.validTo < capped ? o.validTo : capped };
 }
 
+/** True when an extracted offer is missing the terms that would make it safe to use (a cap for "up to" offers). */
+export function needsTerms(o: ProposedOffer): boolean {
+  const text = `${o.title} ${o.quote}`;
+  return (o.percent !== undefined && o.maxBenefit === undefined && /up\s*to/i.test(text)) || !o.dateQuote;
+}
+
 export function acceptOffer(pageText: string, o: ProposedOffer, today: string): { ok: boolean; why?: string } {
   if (!pageContainsQuote(pageText, o.quote)) return { ok: false, why: "quote not found on page" };
   if (!numbersBackedByQuote(o.quote, [o.percent, o.flat, o.maxBenefit, o.minTxn])) return { ok: false, why: "numbers not present in the quote" };
@@ -460,5 +466,9 @@ export function acceptOffer(pageText: string, o: ProposedOffer, today: string): 
   if (o.percent === undefined && o.flat === undefined) return { ok: false, why: "no benefit amount" };
   if ((o.percent ?? 0) > 50 || (o.flat ?? 0) > 50_000) return { ok: false, why: "implausible benefit" };
   if (!o.issuer && !o.cardIds?.length) return { ok: false, why: "no issuer or card" };
+  const text = `${o.title} ${o.quote}`;
+  // "Up to 15%" is a ceiling, not a rate: without the cap we'd be promising the maximum on every purchase.
+  if (o.percent !== undefined && o.maxBenefit === undefined && /up\s*to\s*\d+(?:\.\d+)?\s*%/i.test(text)) return { ok: false, why: "\"up to\" percentage with no cap stated (needs the offer's terms page)" };
+  if (o.percent === undefined && o.flat !== undefined && o.minTxn === undefined && /up\s*to\s*(?:₹|rs\.?|inr)/i.test(text)) return { ok: false, why: "\"up to\" amount with no minimum spend stated (needs the offer's terms page)" };
   return { ok: true };
 }

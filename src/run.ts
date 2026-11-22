@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { applyCardCheck, cleanOffers, dropVanishedOffers, mergeOffers, report, type Change } from "./apply.ts";
-import { acceptCheck, extractorFromEnv, type Extractor, type ProposedOffer } from "./extract.ts";
+import { acceptCheck, extractorFromEnv, needsTerms, type Extractor, type ProposedOffer } from "./extract.ts";
 
 const offerKey = (o: ProposedOffer) => `${o.merchantId}|${o.percent ?? ""}|${o.flat ?? ""}|${o.maxBenefit ?? ""}`;
 import { fetchPage, httpFetcher, type Fetcher, type PageText } from "./fetch.ts";
@@ -79,6 +79,21 @@ function healthTable(sources: Source[], health: Record<string, SourceHealth>): s
     return `| ${s.id} | ❌ | ${(h.error ?? "").slice(0, 160).replace(/\|/g, "/")} | ${since} |`;
   });
   return ["## Sources", "", "| source | ok | detail | note |", "|---|---|---|---|", ...rows, ""].join("\n");
+}
+
+/** Links on a listing page that name the merchant of an offer still missing its terms (cap, end date). */
+export function termsLinks(catalog: Catalog, offers: ProposedOffer[], links: { href: string; text: string }[], exclude: Set<string>, max: number): string[] {
+  const out: string[] = [];
+  for (const o of offers.filter(needsTerms)) {
+    const m = catalog.merchants.find((x) => x.id === o.merchantId);
+    if (!m) continue;
+    const words = [m.id.replace(/_/g, "-"), m.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")].filter((w) => w.length >= 3);
+    const hit = links.find((l) => !exclude.has(l.href) && !out.includes(l.href) &&
+      words.some((w) => l.href.toLowerCase().includes(w) || l.text.toLowerCase().replace(/[^a-z0-9]+/g, "-").includes(w)));
+    if (hit) out.push(hit.href);
+    if (out.length >= max) break;
+  }
+  return out;
 }
 
 /** One slow or hanging site must never stall the whole run. */
@@ -191,19 +206,24 @@ export async function runPipeline(
             return { offers: all, notes };
           };
 
+          let listingOffers: ProposedOffer[] = [];
           const listingKey = `${s.id}@${page.url}`, listingHash = hashOf(page.text);
           if (pageHashes.get(listingKey) === listingHash) {
             log(`${s.id}: listing unchanged, AI skipped`);
           } else {
             const { offers, notes } = await readOffers(page, true);
+            listingOffers = offers;
             staged.push(() => [...notes, ...mergeOffers(catalog, offers, page.text, page.url, today), ...dropVanishedOffers(catalog, page.url, page.text)]);
             stagedHashes.push([listingKey, listingHash]);
           }
 
-          // Link scout → detail pages (each: extractor + verifier).
+          // Link scout → detail pages (each: extractor + verifier), plus targeted follow-ups for offers missing terms.
           if (s.followLinks && page.links?.length && extractor.pickOfferLinks) {
             const candidates = page.links.filter((l) => l.href !== page.url && (!s.followLinks!.pattern || l.href.includes(s.followLinks!.pattern)));
-            const picked = await extractor.pickOfferLinks(catalog, candidates, hint, s.followLinks.max);
+            const scouted = await extractor.pickOfferLinks(catalog, candidates, hint, s.followLinks.max);
+            const followUps = termsLinks(catalog, listingOffers, page.links.filter((l) => l.href !== page.url), new Set(scouted), 3);
+            if (followUps.length) log(`${s.id}: following ${followUps.length} link(s) for offers missing their terms`);
+            const picked = [...scouted, ...followUps];
             log(`${s.id}: link scout picked ${picked.length} of ${candidates.length} links`);
             let opened = 0;
             for (const href of picked) {

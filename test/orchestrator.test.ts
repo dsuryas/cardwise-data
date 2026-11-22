@@ -112,3 +112,44 @@ describe("review vs live", () => {
     expect(res.reviewCatalog!.version > res.catalog.version || res.reviewCatalog!.version.endsWith("-1")).toBe(true);
   });
 });
+
+describe("offer safety", () => {
+  const base: ProposedOffer = { title: "Flights", merchantId: "makemytrip", issuer: "ICICI", percent: 15, validFrom: TODAY, validTo: "2026-12-31", quote: "Get Up To 15% Instant Discount on flights", dateQuote: "Valid till 31st Dec 2026" };
+  const page = "Get Up To 15% Instant Discount on flights. Get Up To 15% Instant Discount on flights up to Rs 3000. Valid till 31st Dec 2026. Get up to Rs 500 off on hotels.";
+
+  it("rejects an 'up to' percentage with no cap, accepts it once the cap is known", async () => {
+    const { acceptOffer } = await import("../src/extract.ts");
+    expect(acceptOffer(page, base, TODAY)).toEqual({ ok: false, why: expect.stringMatching(/no cap/) });
+    expect(acceptOffer(page, { ...base, maxBenefit: 3000, quote: "Get Up To 15% Instant Discount on flights up to Rs 3000" }, TODAY).ok).toBe(true);
+    expect(acceptOffer(page, { ...base, percent: undefined, flat: 500, title: "Hotels", quote: "Get up to Rs 500 off on hotels" }, TODAY))
+      .toEqual({ ok: false, why: expect.stringMatching(/minimum spend/) });
+  });
+
+  it("follows a link naming the merchant when an offer is missing its terms", async () => {
+    const { termsLinks } = await import("../src/run.ts");
+    const links = [{ href: "https://bank.example/offers/makemytrip-flight-sale", text: "Know more" }, { href: "https://bank.example/offers/croma", text: "Croma" }, { href: "https://bank.example/login", text: "Login" }];
+    expect(termsLinks(load(), [base], links, new Set(), 3)).toEqual(["https://bank.example/offers/makemytrip-flight-sale"]);
+    expect(termsLinks(load(), [{ ...base, maxBenefit: 3000 }], links, new Set(), 3)).toEqual([]);
+  });
+
+  it("treats the same deal under a new title as the same offer", async () => {
+    const { mergeOffers } = await import("../src/apply.ts");
+    const c = load();
+    const page2 = "Enjoy 10% off up to INR 1,000 on Nykaa Beauty and Nykaa Fashion. Valid till 31st Dec 2026.";
+    const a: ProposedOffer = { title: "Nykaa", merchantId: "nykaa", issuer: "HSBC", percent: 10, maxBenefit: 1000, validFrom: TODAY, validTo: "2026-12-31", quote: "Enjoy 10% off up to INR 1,000 on Nykaa Beauty and Nykaa Fashion", dateQuote: "Valid till 31st Dec 2026" };
+    mergeOffers(c, [a], page2, "https://bank.example/o", TODAY);
+    const n = c.offers.length;
+    const changes = mergeOffers(c, [{ ...a, title: "Nykaa Beauty & Fashion" }], page2, "https://bank.example/o", TODAY);
+    expect(c.offers.length).toBe(n);
+    expect(changes.filter((x) => x.what.startsWith("new offer"))).toEqual([]);
+  });
+});
+
+it("cleans out live 'up to' offers that have no cap", async () => {
+  const { cleanOffers } = await import("../src/apply.ts");
+  const c = load();
+  c.offers.push({ id: "x", title: "Get Up To 15% Instant Discount", merchants: ["makemytrip"], issuers: ["ICICI"], percent: 15, validFrom: TODAY, validTo: "2026-11-29", quote: "Get Up To 15% Instant Discount" } as never);
+  const ch = cleanOffers(c, TODAY, false);
+  expect(c.offers.some((o) => o.id === "x")).toBe(false);
+  expect(ch.some((x) => /no cap/.test(x.what))).toBe(true);
+});
