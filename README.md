@@ -27,7 +27,7 @@ catalog/catalog.json ◀── apply ◀── guardrails ◀── Claude: chec
 2. **Make a signing key.** `npm ci && npm run keygen`. It prints two lines:
    - the private key → GitHub repo **Settings → Secrets and variables → Actions → New secret** named `CATALOG_SIGNING_KEY`
    - the public key → keep it for step 6
-3. **Add a free Gemini API key** as another secret, `GEMINI_API_KEY` (aistudio.google.com → Get API key). Default model `gemini-flash-latest`; set a repository variable `GEMINI_MODEL` to change it. Alternatives: `XAI_API_KEY` (Grok, paid credits) or `ANTHROPIC_API_KEY` (Claude); the first one set, in that order, is used.
+3. **Add a free Gemini API key** as another secret, `GEMINI_API_KEY` (aistudio.google.com → Get API key). Default models `gemini-flash-lite-latest`, then `gemini-3.1-flash-lite` (Flash-Lite's free tier allows ~500 requests/day; plain Flash only ~20). Set a repository variable `GEMINI_MODEL` (comma-separated, tried in order) to change them. Alternatives: `XAI_API_KEY` (Grok, paid credits) or `ANTHROPIC_API_KEY` (Claude); the first one set, in that order, is used.
 4. **Turn on Pages.** Settings → Pages → Source: **GitHub Actions**.
 5. **Let the bot open PRs.** Settings → Actions → General → Workflow permissions: **Read and write**, and tick **Allow GitHub Actions to create and approve pull requests**.
 6. **Connect the app.** Actions → **Publish catalog** → Run workflow. When it's done, `https://<you>.github.io/cardwise-data/catalog.json` exists. In the CardWise project's `gradle.properties` add:

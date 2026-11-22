@@ -196,23 +196,48 @@ export class OpenAICompatExtractor extends LlmExtractor {
  * OpenAI-compatibility layer were timing out; native structured output is the supported path.
  */
 export class GeminiExtractor extends LlmExtractor {
-  retryDelayMs = 15_000;
-  private thinking = true;
+  retryDelayMs = 20_000;
+  /** Free tier allows ~15 requests/minute on Flash-Lite: keep calls at least this far apart. */
+  minGapMs = 5_000;
+  private lastCall = 0;
+  private noThinking = new Set<string>();
+  private exhausted = new Set<string>();
+  private models: string[];
   constructor(
-    private model = process.env.GEMINI_MODEL || "gemini-flash-latest",
+    models = process.env.GEMINI_MODEL || "gemini-flash-lite-latest,gemini-3.1-flash-lite",
     private apiKey = process.env.GEMINI_API_KEY,
     private baseUrl = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta",
   ) {
     super();
     if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
+    this.models = models.split(",").map((m) => m.trim()).filter(Boolean);
   }
 
+  /** Tries each model in order; a model that's over quota, missing, or persistently overloaded hands over to the next. */
   protected async tool<T>(_name: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
+    const errors: string[] = [];
+    for (const model of this.models) {
+      if (this.exhausted.has(model)) continue;
+      try {
+        return await this.callModel<T>(model, description, schema, prompt);
+      } catch (e) {
+        errors.push(`${model}: ${(e as Error).message}`);
+        if (e instanceof FatalApiError && !(e as FatalApiError).nextModel) throw e;
+      }
+    }
+    throw new Error(errors.join(" | ") || "no Gemini model available");
+  }
+
+  private async callModel<T>(model: string, description: string, schema: Record<string, unknown>, prompt: string): Promise<T> {
     let lastError: unknown;
     for (let attempt = 0; attempt < 3; attempt++) {
+      const wait = this.lastCall + this.minGapMs - Date.now();
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+      this.lastCall = Date.now();
       const t0 = Date.now();
+      const thinking = !this.noThinking.has(model);
       try {
-        const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/models/${encodeURIComponent(this.model)}:generateContent`, {
+        const res = await fetch(`${this.baseUrl.replace(/\/$/, "")}/models/${encodeURIComponent(model)}:generateContent`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-goog-api-key": this.apiKey! },
           body: JSON.stringify({
@@ -222,33 +247,35 @@ export class GeminiExtractor extends LlmExtractor {
               responseJsonSchema: schema,
               maxOutputTokens: 8192,
               temperature: 0,
-              ...(this.thinking ? { thinkingConfig: { thinkingLevel: process.env.GEMINI_THINKING ?? "low" } } : {}),
+              ...(thinking ? { thinkingConfig: { thinkingLevel: process.env.GEMINI_THINKING ?? "low" } } : {}),
             },
           }),
           signal: AbortSignal.timeout(90_000),
         });
-        if (!process.env.VITEST) console.log(`    Gemini ${this.model} attempt ${attempt + 1}: HTTP ${res.status} in ${Math.round((Date.now() - t0) / 1000)}s`);
-        if (res.status === 400 && this.thinking) {
-          const text = await res.text();
-          if (/thinking/i.test(text)) { this.thinking = false; attempt--; continue; } // older model: no thinking levels
-          throw new FatalApiError(`Gemini API 400: ${text.slice(0, 300)}`);
+        if (!process.env.VITEST) console.log(`    Gemini ${model} attempt ${attempt + 1}: HTTP ${res.status} in ${Math.round((Date.now() - t0) / 1000)}s`);
+        if (res.ok) {
+          const body = (await res.json()) as { candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[]; promptFeedback?: { blockReason?: string } };
+          if (body.promptFeedback?.blockReason) throw new FatalApiError(`Gemini blocked the prompt: ${body.promptFeedback.blockReason}`);
+          const cand = body.candidates?.[0];
+          const text = (cand?.content?.parts ?? []).filter((p) => !p.thought && p.text).map((p) => p.text).join("");
+          if (!text) throw new Error(`no answer (finishReason ${cand?.finishReason ?? "unknown"})`);
+          return JSON.parse(text) as T;
         }
-        if (res.status === 429 || res.status >= 500) throw new Error(`Gemini API ${res.status}: ${(await res.text()).slice(0, 200)}`);
-        if (!res.ok) throw new FatalApiError(`Gemini API ${res.status}: ${(await res.text()).slice(0, 300)}`);
-        const body = (await res.json()) as { candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[]; promptFeedback?: { blockReason?: string } };
-        if (body.promptFeedback?.blockReason) throw new FatalApiError(`Gemini blocked the prompt: ${body.promptFeedback.blockReason}`);
-        const cand = body.candidates?.[0];
-        const text = (cand?.content?.parts ?? []).filter((p) => !p.thought && p.text).map((p) => p.text).join("");
-        if (!text) throw new Error(`no answer (finishReason ${cand?.finishReason ?? "unknown"})`);
-        return JSON.parse(text) as T;
+        const errText = (await res.text()).slice(0, 400);
+        if (res.status === 400 && thinking && /thinking/i.test(errText)) { this.noThinking.add(model); attempt--; continue; }
+        if (res.status === 404) { this.exhausted.add(model); throw new FatalApiError(`model not found`, true); }
+        // Daily quota gone: no point retrying this model today.
+        if (res.status === 429 && /PerDay|per day/i.test(errText)) { this.exhausted.add(model); throw new FatalApiError(`daily quota used up`, true); }
+        if (res.status === 429 || res.status >= 500) throw new Error(`HTTP ${res.status}: ${errText.replace(/\s+/g, " ").slice(0, 160)}`);
+        throw new FatalApiError(`Gemini API ${res.status}: ${errText}`);
       } catch (e) {
         if (e instanceof FatalApiError) throw e;
-        if (!process.env.VITEST) console.log(`    Gemini attempt ${attempt + 1} failed after ${Math.round((Date.now() - t0) / 1000)}s: ${(e as Error).message}`);
+        if (!process.env.VITEST) console.log(`    Gemini ${model} attempt ${attempt + 1} failed after ${Math.round((Date.now() - t0) / 1000)}s: ${(e as Error).message}`);
         lastError = e;
-        await new Promise((r) => setTimeout(r, this.retryDelayMs * (attempt + 1)));
+        if (attempt < 2) await new Promise((r) => setTimeout(r, this.retryDelayMs * (attempt + 1)));
       }
     }
-    throw lastError;
+    throw new FatalApiError(`still failing after 3 tries: ${(lastError as Error)?.message}`, true);
   }
 }
 
@@ -260,7 +287,10 @@ export class GrokExtractor extends OpenAICompatExtractor {
   }
 }
 
-class FatalApiError extends Error {}
+class FatalApiError extends Error {
+  /** true = this model can't help, but the next one might. */
+  constructor(message: string, public nextModel = false) { super(message); }
+}
 
 /** Anthropic Claude. Used only when no Gemini or xAI key is set. */
 export class ClaudeExtractor extends LlmExtractor {

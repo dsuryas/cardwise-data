@@ -41,14 +41,15 @@ test("Gemini: native JSON mode with the schema, key in header, thoughts ignored"
     return geminiReply({ offers: [] });
   });
   vi.stubGlobal("fetch", fetchMock);
-  expect(await new GeminiExtractor("gemini-test", "g").listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  const gt = new GeminiExtractor("gemini-test", "g"); gt.minGapMs = 0;
+  expect(await gt.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
   expect(fetchMock.mock.calls[0][0]).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-test:generateContent");
 });
 
 test("Gemini: retries a 429 then succeeds", async () => {
   let n = 0;
   vi.stubGlobal("fetch", vi.fn(async () => (++n === 1 ? new Response("slow down", { status: 429 }) : geminiReply({ offers: [] }))));
-  const g = new GeminiExtractor("m", "g"); g.retryDelayMs = 1;
+  const g = new GeminiExtractor("m", "g"); g.retryDelayMs = 1; g.minGapMs = 0;
   expect(await g.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
   expect(n).toBe(2);
 });
@@ -60,8 +61,31 @@ test("Gemini: drops thinkingLevel for models that don't support it", async () =>
     seen.push(cfg.thinkingConfig);
     return cfg.thinkingConfig ? new Response("thinking_level is not supported for this model", { status: 400 }) : geminiReply({ offers: [] });
   }));
-  expect(await new GeminiExtractor("old", "g").listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  const go = new GeminiExtractor("old", "g"); go.minGapMs = 0;
+  expect(await go.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
   expect(seen).toEqual([{ thinkingLevel: "low" }, undefined]);
+});
+
+test("Gemini: a model out of daily quota hands over to the next model, and stays skipped", async () => {
+  const calls: string[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+    calls.push(url.includes("first") ? "first" : "second");
+    return url.includes("first")
+      ? new Response('{"error":{"code":429,"message":"You exceeded your current quota ... GenerateRequestsPerDayPerProjectPerModel-FreeTier"}}', { status: 429 })
+      : geminiReply({ offers: [] });
+  }));
+  const g = new GeminiExtractor("first,second", "g"); g.retryDelayMs = 1; g.minGapMs = 0;
+  expect(await g.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  expect(await g.listOffers(catalog, "x", "2026-11-20", {})).toEqual([]);
+  expect(calls).toEqual(["first", "second", "second"]);
+});
+
+test("Gemini: a bad request is not retried on other models", async () => {
+  const fetchMock = vi.fn(async () => new Response("invalid schema", { status: 400 }));
+  vi.stubGlobal("fetch", fetchMock);
+  const g = new GeminiExtractor("a,b", "g"); g.minGapMs = 0;
+  await expect(g.listOffers(catalog, "x", "2026-11-20", {})).rejects.toThrow(/400/);
+  expect(fetchMock).toHaveBeenCalledTimes(1);
 });
 
 test("provider choice: Gemini first, then Grok", () => {
