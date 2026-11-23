@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.22-3",
+  "version": "2026.11.23-1",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
@@ -794,7 +794,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-22"
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "sbi_cashback",
@@ -860,7 +860,7 @@
         "millennia"
       ],
       "verified": true,
-      "checkedOn": "2026-11-22",
+      "checkedOn": "2026-11-23",
       "caps": [
         {
           "id": "mil_partner",
@@ -1029,7 +1029,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-22"
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "flipkart_axis",
@@ -1059,7 +1059,8 @@
             "flipkart",
             "cleartrip"
           ],
-          "percent": 5
+          "percent": 5,
+          "source": "https://www.axis.bank.in/cards/credit-card/flipkart-axisbank-credit-card"
         },
         {
           "id": "fka_preferred",
@@ -1069,14 +1070,18 @@
             "uber",
             "pvr"
           ],
-          "percent": 4
+          "percent": 4,
+          "source": "https://www.axis.bank.in/cards/credit-card/flipkart-axisbank-credit-card"
         },
         {
           "id": "fka_base",
           "label": "everywhere else",
-          "percent": 1
+          "percent": 1,
+          "source": "https://www.axis.bank.in/cards/credit-card/flipkart-axisbank-credit-card"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "axis_ace",
@@ -1113,14 +1118,18 @@
             "ola"
           ],
           "percent": 4,
-          "cap": "ace_cycle"
+          "cap": "ace_cycle",
+          "source": "https://www.axis.bank.in/cards/credit-card/axis-bank-ace-credit-card"
         },
         {
           "id": "ace_base",
           "label": "everywhere else",
-          "percent": 1.5
+          "percent": 1.5,
+          "source": "https://www.axis.bank.in/cards/credit-card/axis-bank-ace-credit-card"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "hsbc_live_plus",
@@ -1159,14 +1168,18 @@
             "groceries"
           ],
           "percent": 10,
-          "cap": "live_cycle"
+          "cap": "live_cycle",
+          "source": "https://www.hsbc.co.in/credit-cards/products/live-plus/"
         },
         {
           "id": "live_base",
           "label": "everywhere else",
-          "percent": 1.5
+          "percent": 1.5,
+          "source": "https://www.hsbc.co.in/credit-cards/products/live-plus/"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "sbi_simplyclick",
@@ -1297,9 +1310,12 @@
           "id": "inf_base",
           "label": "everywhere",
           "units": 5,
-          "perRupees": 150
+          "perRupees": 150,
+          "source": "https://www.hdfc.bank.in/credit-cards/infinia-credit-card"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "amex_mrcc",
@@ -1323,9 +1339,12 @@
           "id": "mrcc_base",
           "label": "everywhere",
           "units": 1,
-          "perRupees": 50
+          "perRupees": 50,
+          "source": "https://www.americanexpress.com/in/credit-cards/membership-rewards-card/"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-23"
     },
     {
       "id": "hdfc_millennia_diners",
@@ -1348,7 +1367,7 @@
         "millennia diners"
       ],
       "verified": true,
-      "checkedOn": "2026-11-22",
+      "checkedOn": "2026-11-23",
       "caps": [
         {
           "id": "mil_partner_d",
@@ -1411,7 +1430,7 @@
         "ornge"
       ],
       "verified": true,
-      "checkedOn": "2026-11-22",
+      "checkedOn": "2026-11-23",
       "caps": [
         {
           "id": "orn_swiggy",
@@ -1517,7 +1536,7 @@
         "mega saver"
       ],
       "verified": true,
-      "checkedOn": "2026-11-22",
+      "checkedOn": "2026-11-23",
       "caps": [
         {
           "id": "upi_3",
@@ -1626,7 +1645,7 @@
         "platinum chip"
       ],
       "verified": true,
-      "checkedOn": "2026-11-22",
+      "checkedOn": "2026-11-23",
       "rules": [
         {
           "id": "plat_util",
@@ -1667,7 +1686,7 @@
         "sapphiro"
       ],
       "verified": true,
-      "checkedOn": "2026-11-22",
+      "checkedOn": "2026-11-23",
       "rules": [
         {
           "id": "sap_intl",
@@ -1702,8 +1721,8 @@
   ],
   "offers": [
     {
-      "id": "bookmyshow_hsbc_31442009",
-      "title": "10% off on live events, up to ₹1000/month on all HSBC Credit Cards on all day of the week",
+      "id": "bookmyshow_hsbc_72e1abf7",
+      "title": "10% off on live events",
       "merchants": [
         "bookmyshow"
       ],
@@ -1713,8 +1732,7 @@
       "percent": 10,
       "maxBenefit": 1000,
       "paymentModes": [
-        "FULL",
-        "EMI"
+        "FULL"
       ],
       "days": [
         "MONDAY",
@@ -1728,26 +1746,7 @@
       "validFrom": "2026-07-01",
       "validTo": "2026-12-31",
       "source": "https://www.hsbc.co.in/credit-cards/offers/bookmyshow-saturday/",
-      "quote": "10% off up to ₹1000 on booking live event tickets i.e. live music shows, concerts, plays, sports, activities, and workshops.",
-      "checkedOn": "2026-11-22"
-    },
-    {
-      "id": "tata_cliq_icici_96bdea63",
-      "title": "Get 10% Instant Discount",
-      "merchants": [
-        "tata_cliq"
-      ],
-      "issuers": [
-        "ICICI"
-      ],
-      "percent": 10,
-      "paymentModes": [
-        "FULL"
-      ],
-      "validFrom": "2026-11-22",
-      "validTo": "2026-11-29",
-      "source": "https://www.icici.bank.in/offers",
-      "quote": "Get 10% Instant Discount",
+      "quote": "10% off on live events, up to ₹1000/month on all HSBC Credit Cards on all day of the week",
       "checkedOn": "2026-11-22"
     },
     {
@@ -1806,25 +1805,6 @@
       "checkedOn": "2026-11-22"
     },
     {
-      "id": "bookmyshow_hsbc_e500f423",
-      "title": "BookMyShow Lounge",
-      "merchants": [
-        "bookmyshow"
-      ],
-      "issuers": [
-        "HSBC"
-      ],
-      "percent": 10,
-      "days": [
-        "SATURDAY"
-      ],
-      "validFrom": "2026-11-22",
-      "validTo": "2026-12-31",
-      "source": "https://www.hsbc.co.in/credit-cards/offers/",
-      "quote": "Enjoy 10% off live events and get buy-one-get-one-free movie tickets on Saturdays with your HSBC credit card.",
-      "checkedOn": "2026-11-22"
-    },
-    {
       "id": "zomato_hsbc_0ec47d66",
       "title": "District by Zomato",
       "merchants": [
@@ -1841,33 +1821,385 @@
       "checkedOn": "2026-11-22"
     },
     {
-      "id": "bookmyshow_hsbc_72e1abf7",
-      "title": "10% off on live events",
+      "id": "blinkit_hdfc_a511568e",
+      "title": "1.5% Cashback on e-voucher purchase",
       "merchants": [
-        "bookmyshow"
+        "blinkit"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/blinkit",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "blinkit_hdfc_78e247b6",
+      "title": "1% Cashback on e-voucher purchase",
+      "merchants": [
+        "blinkit"
       ],
       "issuers": [
-        "HSBC"
+        "HDFC"
+      ],
+      "percent": 1,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/blinkit",
+      "quote": "1% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "blinkit_hdfc_2424dd96",
+      "title": "5X Reward points on e-voucher purchase",
+      "merchants": [
+        "blinkit"
+      ],
+      "cards": [
+        "hdfc_infinia"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/blinkit",
+      "quote": "5X Reward points on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "makemytrip_hdfc_f60df625",
+      "title": "5% Cashback on hotel booking",
+      "merchants": [
+        "makemytrip"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/make-my-trip",
+      "quote": "5% Cashback on hotel booking",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "makemytrip_hdfc_9f9e83db",
+      "title": "6% Cashback on hotel booking",
+      "merchants": [
+        "makemytrip"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 6,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/make-my-trip",
+      "quote": "6% Cashback on hotel booking",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "cleartrip_hdfc_a068e4bf",
+      "title": "Get 10% off on AC Train Bookings – Up to Rs. 100 Off",
+      "merchants": [
+        "cleartrip"
+      ],
+      "cards": [
+        "hdfc_regalia_gold",
+        "hdfc_infinia",
+        "tata_neu_infinity_hdfc"
       ],
       "percent": 10,
-      "maxBenefit": 1000,
+      "maxBenefit": 100,
+      "validFrom": "2026-11-23",
+      "validTo": "2026-12-31",
+      "source": "https://www.hdfc.bank.in/ps/offers/cleartrip",
+      "quote": "Get 10% off on AC Train Bookings – Up to Rs. 100 Off",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "cleartrip_hdfc_43531dcd",
+      "title": "5% Cashback on hotel booking",
+      "merchants": [
+        "cleartrip"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/cleartrip",
+      "quote": "5% Cashback on hotel booking",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "ixigo_hdfc_e76786f3",
+      "title": "Flat 7.5% Instant Discount",
+      "merchants": [
+        "ixigo"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 7.5,
       "paymentModes": [
         "FULL"
       ],
-      "days": [
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY"
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/ixigo",
+      "quote": "Flat 7.5% Instant Discount",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "ixigo_hdfc_b9469ba8",
+      "title": "Flat 7.5% Instant Discount",
+      "merchants": [
+        "ixigo"
       ],
-      "validFrom": "2026-07-01",
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 7.5,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/ixigo",
+      "quote": "Flat 7.5% Instant Discount",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "zepto_hdfc_17634b16",
+      "title": "Get 5% Instant Discount up to Rs. 4,000 on orders above Rs. 3,000 with EASYEMI on HDFC Bank Credit Cards",
+      "merchants": [
+        "zepto"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "maxBenefit": 4000,
+      "minTxn": 3000,
+      "paymentModes": [
+        "EMI"
+      ],
+      "validFrom": "2026-11-23",
+      "validTo": "2026-11-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/zepto",
+      "quote": "Get 5% Instant Discount up to Rs. 4,000 on orders above Rs. 3,000 with EASYEMI on HDFC Bank Credit Cards",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "zepto_hdfc_cdc41604",
+      "title": "1.5% Cashback on e-voucher purchase",
+      "merchants": [
+        "zepto"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/zepto",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "zepto_hdfc_9d632f39",
+      "title": "1% Cashback on e-voucher purchase",
+      "merchants": [
+        "zepto"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 1,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/zepto",
+      "quote": "1% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "swiggy_instamart_hdfc_fba465d4",
+      "title": "1.5% Cashback on e-voucher purchase",
+      "merchants": [
+        "swiggy_instamart"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/swiggy-instamart",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "swiggy_instamart_hdfc_32f33d0f",
+      "title": "5% Cashback on e-voucher purchase",
+      "merchants": [
+        "swiggy_instamart"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/swiggy-instamart",
+      "quote": "5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "swiggy_instamart_hdfc_7c47181a",
+      "title": "1% Cashback on e-voucher purchase",
+      "merchants": [
+        "swiggy_instamart"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 1,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/swiggy-instamart",
+      "quote": "1% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "bigbasket_hdfc_f8efc25e",
+      "title": "Get flat Rs 4,000 on Iphone 17 Pro & 17 Pro Max on the BigBasket App",
+      "merchants": [
+        "bigbasket"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "excludeCards": [
+        "amazon_pay_icici"
+      ],
+      "flat": 4000,
+      "validFrom": "2026-11-23",
       "validTo": "2026-12-31",
-      "source": "https://www.hsbc.co.in/credit-cards/offers/bookmyshow-saturday/",
-      "quote": "10% off on live events, up to ₹1000/month on all HSBC Credit Cards on all day of the week",
-      "checkedOn": "2026-11-22"
+      "source": "https://www.hdfc.bank.in/ps/offers/bigbasket",
+      "quote": "Get flat Rs 4,000 on Iphone 17 Pro & 17 Pro Max on the BigBasket App",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "reliance_digital_hdfc_c78f50e3",
+      "title": "Get Flat Rs. 5,000 Discount on Apple Iphone 17 Pro & 17 Pro Max at Reliance Digital with EASYEMI on HDFC Bank Debit/Credit Cards",
+      "merchants": [
+        "reliance_digital"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "flat": 5000,
+      "paymentModes": [
+        "EMI"
+      ],
+      "validFrom": "2026-11-23",
+      "validTo": "2026-11-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/reliance-digital",
+      "quote": "Get Flat Rs. 5,000 Discount on Apple Iphone 17 Pro & 17 Pro Max at Reliance Digital with EASYEMI on HDFC Bank Debit/Credit Cards",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "ajio_hdfc_7bc78c91",
+      "title": "1.5% Cashback on e-voucher purchase",
+      "merchants": [
+        "ajio"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/ajio",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "easemytrip_hdfc_f8704fae",
+      "title": "Get Rs.120 off on min booking amount of Rs.1,200 for bus booking.",
+      "merchants": [
+        "easemytrip"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "flat": 120,
+      "minTxn": 1200,
+      "validFrom": "2026-11-23",
+      "validTo": "2026-12-31",
+      "source": "https://www.hdfc.bank.in/ps/offers/easemytrip",
+      "quote": "Get Rs.120 off on min booking amount of Rs.1,200 for bus booking.",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "easemytrip_hdfc_b32e34db",
+      "title": "Get Rs.1000 off on min booking amount of Rs.15,000 for international flight.",
+      "merchants": [
+        "easemytrip"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "flat": 1000,
+      "minTxn": 15000,
+      "validFrom": "2026-11-23",
+      "validTo": "2026-12-31",
+      "source": "https://www.hdfc.bank.in/ps/offers/easemytrip",
+      "quote": "Get Rs.1000 off on min booking amount of Rs.15,000 for international flight.",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "easemytrip_hdfc_a9163a96",
+      "title": "Get INR 500 off on min. booking amount of INR 3,500 for hotel booking",
+      "merchants": [
+        "easemytrip"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "flat": 500,
+      "minTxn": 3500,
+      "validFrom": "2026-11-23",
+      "validTo": "2026-12-31",
+      "source": "https://www.hdfc.bank.in/ps/offers/easemytrip",
+      "quote": "Get INR 500 off on min. booking amount of INR 3,500 for hotel booking",
+      "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "vijay_sales_hdfc_1e13d6e6",
+      "title": "1.5% Cashback on e-voucher purchase",
+      "merchants": [
+        "vijay_sales"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "validFrom": "2026-11-23",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/vijay-sales",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-23"
     }
   ],
   "fees": [
