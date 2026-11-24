@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.23-1",
+  "version": "2026.11.24-1",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
@@ -794,7 +794,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "sbi_cashback",
@@ -831,15 +831,19 @@
             "ONLINE"
           ],
           "percent": 5,
-          "cap": "sbicb_cycle"
+          "cap": "sbicb_cycle",
+          "source": "https://www.sbicard.com/en/personal/sbi-credit-card.page"
         },
         {
           "id": "sbicb_base",
           "label": "offline",
           "percent": 1,
-          "cap": "sbicb_cycle"
+          "cap": "sbicb_cycle",
+          "source": "https://www.sbicard.com/en/personal/sbi-credit-card.page"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "hdfc_millennia",
@@ -860,7 +864,7 @@
         "millennia"
       ],
       "verified": true,
-      "checkedOn": "2026-11-23",
+      "checkedOn": "2026-11-24",
       "caps": [
         {
           "id": "mil_partner",
@@ -1029,7 +1033,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "flipkart_axis",
@@ -1081,7 +1085,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "axis_ace",
@@ -1129,7 +1133,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "hsbc_live_plus",
@@ -1179,7 +1183,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "sbi_simplyclick",
@@ -1222,7 +1226,8 @@
           ],
           "units": 10,
           "perRupees": 100,
-          "cap": "sc_10x"
+          "cap": "sc_10x",
+          "source": "https://www.sbicard.com/en/personal/sbi-credit-card.page"
         },
         {
           "id": "sc_online",
@@ -1232,15 +1237,19 @@
           ],
           "units": 5,
           "perRupees": 100,
-          "cap": "sc_5x"
+          "cap": "sc_5x",
+          "source": "https://www.sbicard.com/en/personal/sbi-credit-card.page"
         },
         {
           "id": "sc_base",
           "label": "offline",
           "units": 1,
-          "perRupees": 100
+          "perRupees": 100,
+          "source": "https://www.sbicard.com/en/personal/sbi-credit-card.page"
         }
-      ]
+      ],
+      "verified": true,
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "hdfc_regalia_gold",
@@ -1315,7 +1324,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "amex_mrcc",
@@ -1344,7 +1353,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-23"
+      "checkedOn": "2026-11-24"
     },
     {
       "id": "hdfc_millennia_diners",
@@ -1367,7 +1376,7 @@
         "millennia diners"
       ],
       "verified": true,
-      "checkedOn": "2026-11-23",
+      "checkedOn": "2026-11-24",
       "caps": [
         {
           "id": "mil_partner_d",
@@ -1430,7 +1439,7 @@
         "ornge"
       ],
       "verified": true,
-      "checkedOn": "2026-11-23",
+      "checkedOn": "2026-11-24",
       "caps": [
         {
           "id": "orn_swiggy",
@@ -1536,7 +1545,7 @@
         "mega saver"
       ],
       "verified": true,
-      "checkedOn": "2026-11-23",
+      "checkedOn": "2026-11-24",
       "caps": [
         {
           "id": "upi_3",
@@ -1645,7 +1654,7 @@
         "platinum chip"
       ],
       "verified": true,
-      "checkedOn": "2026-11-23",
+      "checkedOn": "2026-11-24",
       "rules": [
         {
           "id": "plat_util",
@@ -1686,7 +1695,7 @@
         "sapphiro"
       ],
       "verified": true,
-      "checkedOn": "2026-11-23",
+      "checkedOn": "2026-11-24",
       "rules": [
         {
           "id": "sap_intl",
@@ -2200,6 +2209,224 @@
       "source": "https://www.hdfc.bank.in/ps/offers/vijay-sales",
       "quote": "1.5% Cashback on e-voucher purchase",
       "checkedOn": "2026-11-23"
+    },
+    {
+      "id": "flipkart_hdfc_f0faf545",
+      "title": "Flat 5% Instant Discount",
+      "merchants": [
+        "flipkart"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/flipkart",
+      "quote": "Flat 5% Instant Discount",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "flipkart_hdfc_cdc8aedc",
+      "title": "Flat 5% Instant Discount",
+      "merchants": [
+        "flipkart"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/flipkart",
+      "quote": "Flat 5% Instant Discount",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "swiggy_hdfc_e55e8a44",
+      "title": "5X Reward points on e-voucher purchase",
+      "merchants": [
+        "swiggy"
+      ],
+      "cards": [
+        "hdfc_infinia"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/swiggy",
+      "quote": "5X Reward points on e-voucher purchase",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "swiggy_hdfc_82e2d942",
+      "title": "3X Reward points on e-voucher purchase",
+      "merchants": [
+        "swiggy"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 3,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/swiggy",
+      "quote": "3X Reward points on e-voucher purchase",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "zomato_hdfc_81cace49",
+      "title": "1.5% Cashback on e-voucher purchase",
+      "merchants": [
+        "zomato"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/zomato",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "myntra_hdfc_7ad55c09",
+      "title": "4% Cashback on Myntra purchase",
+      "merchants": [
+        "myntra"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 4,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/myntra",
+      "quote": "4% Cashback on Myntra purchase",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "myntra_hdfc_98c1b1a5",
+      "title": "6% Cashback on Myntra purchase",
+      "merchants": [
+        "myntra"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 6,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/myntra",
+      "quote": "6% Cashback on Myntra purchase",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "tata_cliq_hdfc_179bfa80",
+      "title": "Get Instant Discount 12% up to Rs 2500 with EASYEMI on HDFC Bank Credit Cards.",
+      "merchants": [
+        "tata_cliq"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 12,
+      "maxBenefit": 2500,
+      "paymentModes": [
+        "EMI"
+      ],
+      "validFrom": "2026-11-24",
+      "validTo": "2026-11-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/tata-cliq",
+      "quote": "Get Instant Discount 12% up to Rs 2500 with EASYEMI on HDFC Bank Credit Cards.",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "tata_cliq_hdfc_2a0c695d",
+      "title": "Flat 6.5% Instant Discount",
+      "merchants": [
+        "tata_cliq"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 6.5,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/tata-cliq",
+      "quote": "Flat 6.5% Instant Discount",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "tata_cliq_hdfc_628699fa",
+      "title": "Flat 6.5% Instant Discount",
+      "merchants": [
+        "tata_cliq"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 6.5,
+      "paymentModes": [
+        "FULL"
+      ],
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/tata-cliq",
+      "quote": "Flat 6.5% Instant Discount",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "croma_hdfc_c5befa3a",
+      "title": "Get Flat ₹4,000 discount on Apple Iphone 17 Pro & 17 Pro Max with HDFC Bank Credit Cards & EASYEMI on Debit/Credit Cards",
+      "merchants": [
+        "croma"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "flat": 4000,
+      "validFrom": "2026-11-24",
+      "validTo": "2026-12-31",
+      "source": "https://www.hdfc.bank.in/ps/offers/croma",
+      "quote": "Get Flat ₹4,000 discount on Apple Iphone 17 Pro & 17 Pro Max with HDFC Bank Credit Cards & EASYEMI on Debit/Credit Cards",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "croma_hdfc_f9e6da96",
+      "title": "5% Cashback on e-voucher purchase",
+      "merchants": [
+        "croma"
+      ],
+      "issuers": [
+        "HDFC"
+      ],
+      "percent": 5,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/croma",
+      "quote": "5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-24"
+    },
+    {
+      "id": "croma_hdfc_91de7b6f",
+      "title": "1.5% Cashback on e-voucher purchase",
+      "merchants": [
+        "croma"
+      ],
+      "cards": [
+        "tata_neu_infinity_hdfc"
+      ],
+      "percent": 1.5,
+      "validFrom": "2026-11-24",
+      "validTo": "2027-06-30",
+      "source": "https://www.hdfc.bank.in/ps/offers/croma",
+      "quote": "1.5% Cashback on e-voucher purchase",
+      "checkedOn": "2026-11-24"
     }
   ],
   "fees": [
