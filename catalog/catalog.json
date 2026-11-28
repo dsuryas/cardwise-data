@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.26-1",
+  "version": "2026.11.28-1",
   "note": "Cards with verified=true were checked against the issuer's own pages on checkedOn; others are SAMPLE data. All offers are SAMPLE (illustrative) until the daily pipeline lands.",
   "currencies": [
     {
@@ -794,7 +794,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "sbi_cashback",
@@ -843,7 +843,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "hdfc_millennia",
@@ -864,7 +864,7 @@
         "millennia"
       ],
       "verified": true,
-      "checkedOn": "2026-11-26",
+      "checkedOn": "2026-11-28",
       "caps": [
         {
           "id": "mil_partner",
@@ -1033,7 +1033,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "flipkart_axis",
@@ -1085,7 +1085,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "axis_ace",
@@ -1133,7 +1133,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "hsbc_live_plus",
@@ -1183,7 +1183,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "sbi_simplyclick",
@@ -1249,7 +1249,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "hdfc_regalia_gold",
@@ -1324,7 +1324,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "amex_mrcc",
@@ -1353,7 +1353,7 @@
         }
       ],
       "verified": true,
-      "checkedOn": "2026-11-26"
+      "checkedOn": "2026-11-28"
     },
     {
       "id": "hdfc_millennia_diners",
@@ -1376,7 +1376,7 @@
         "millennia diners"
       ],
       "verified": true,
-      "checkedOn": "2026-11-26",
+      "checkedOn": "2026-11-28",
       "caps": [
         {
           "id": "mil_partner_d",
@@ -1439,7 +1439,7 @@
         "ornge"
       ],
       "verified": true,
-      "checkedOn": "2026-11-26",
+      "checkedOn": "2026-11-28",
       "caps": [
         {
           "id": "orn_swiggy",
@@ -1545,7 +1545,7 @@
         "mega saver"
       ],
       "verified": true,
-      "checkedOn": "2026-11-26",
+      "checkedOn": "2026-11-28",
       "caps": [
         {
           "id": "upi_3",
@@ -1654,7 +1654,7 @@
         "platinum chip"
       ],
       "verified": true,
-      "checkedOn": "2026-11-26",
+      "checkedOn": "2026-11-28",
       "rules": [
         {
           "id": "plat_util",
@@ -1695,7 +1695,7 @@
         "sapphiro"
       ],
       "verified": true,
-      "checkedOn": "2026-11-26",
+      "checkedOn": "2026-11-28",
       "rules": [
         {
           "id": "sap_intl",
